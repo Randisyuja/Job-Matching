@@ -1,5 +1,6 @@
 from django.db import models
 from accounts.models import User
+from datetime import date
 
 
 class JenisPekerjaan(models.Model):
@@ -12,7 +13,7 @@ class JenisPekerjaan(models.Model):
     file_path = models.FileField(
         "Icon/Image",
         upload_to="pekerjaan/tipe/",
-        blank=False,
+        blank=True,
         null=False
     )
 
@@ -76,13 +77,11 @@ class Lowongan(models.Model):
     )
     created_at = models.DateTimeField(
         "Tanggal Dibuat",
-        blank=False,
-        null=False
+        auto_now_add=True
     )
     updated_at = models.DateTimeField(
         "Tanggal Diupdate",
-        blank=False,
-        null=False
+        auto_now=True
     )
     created_by = models.ForeignKey(
         User,
@@ -109,6 +108,18 @@ class Lowongan(models.Model):
     def __str__(self):
         return f"{self.nama_perusahaan} - {self.jenis_pekerjaan.nama_pekerjaan}"
 
+    @property
+    def is_expired(self):
+        if not self.batas_lamar:
+            return False
+        return date.today() > self.batas_lamar
+
+    @property
+    def sisa_kuota(self):
+        """Calculate remaining quota"""
+        approved_count = self.lamaran.filter(status_lamaran='Diterima').count()
+        return max(0, self.kuota - approved_count)
+
 
 class Persyaratan(models.Model):
     lowongan = models.ForeignKey(
@@ -116,6 +127,7 @@ class Persyaratan(models.Model):
         on_delete=models.CASCADE,
         blank=False,
         null=False,
+        related_name="persyaratan",
         verbose_name="Lowongan"
     )
     name = models.CharField(
@@ -129,3 +141,6 @@ class Persyaratan(models.Model):
         db_table = "persyaratan"
         verbose_name = "Persyaratan"
         verbose_name_plural = "Persyaratan"
+
+    def __str__(self):
+        return f"{self.name}"
