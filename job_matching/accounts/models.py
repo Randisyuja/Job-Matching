@@ -8,6 +8,7 @@ class User(AbstractUser):
     is_active = models.BooleanField("Aktif", default=True)
     created_at = models.DateTimeField("Tanggal Dibuat", auto_now_add=True)
 
+    USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
 
     class Meta:
@@ -16,7 +17,7 @@ class User(AbstractUser):
         verbose_name_plural = "Users"
 
     def __str__(self):
-        return f"{self.email} ({self.get_user_type_display()})"
+        return f"{self.email}"
 
 
 class Staff(models.Model):
