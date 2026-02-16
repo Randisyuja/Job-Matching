@@ -52,3 +52,12 @@ class Lamaran(models.Model):
         null=True,
         blank=True
     )
+
+    def save(self, *args, **kwargs):
+        if self.lowongan.is_expired and not self.pk:
+            raise ValueError('Tidak dapat melamar ke lowongan yang sudah ditutup')
+
+        if self.lowongan.sisa_kuota <= 0 and not self.pk:
+            raise ValueError('Kuota lowongan sudah penuh')
+
+        super().save(*args, **kwargs)
