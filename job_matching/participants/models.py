@@ -1,6 +1,8 @@
 from django.db import models
+from django.forms import ValidationError
 from accounts.models import User
-from .choices import JenisKelamin, Agama, StatusPernikahan, GolonganDarah, TanganDominan, Jenjang, HubunganKeluarga, DokumenPeserta, StatusValidasi
+from .choices import JenisKelamin, Agama, StatusPernikahan, GolonganDarah, TanganDominan, Jenjang, HubunganKeluarga, DokumenPesertaChoices, StatusValidasi
+from datetime import date
 
 
 class Peserta(models.Model):
@@ -129,7 +131,8 @@ class Peserta(models.Model):
     status_validasi = models.CharField(
         "Status Validasi",
         choices=StatusValidasi,
-        default=StatusValidasi.DIAJUKAN
+        default=StatusValidasi.DIAJUKAN,
+        db_index= True
     )
 
     validasi_1_pada = models.DateTimeField('Tanggal Validasi 1', null=True, blank=True)
@@ -184,9 +187,83 @@ class Peserta(models.Model):
 
     @property
     def usia(self):
-        from datetime import date
         today = date.today()
-        return today.year - self.tanggal_lahir.year
+        age = today.year - self.tanggal_lahir.year
+        if (today.month, today.day) < (self.tanggal_lahir.month, self.tanggal_lahir.day):
+            age -= 1
+        return age
+
+    def validate_level_1(self, validator_user, notes=''):
+        """Admin validates - Level 1"""
+        if self.status_validasi != 'submitted':
+            raise ValidationError('Can only validate submitted profiles')
+
+        from django.utils import timezone
+        self.status_validasi = StatusValidasi.VALIDATED_1
+        self.validasi_1_pada = timezone.now()
+        self.validasi_1_oleh = validator_user
+        self.validasi_1_notes = notes
+        self.save()
+
+    def validate_level_2(self, validator_user, notes=''):
+        """Koordinator validates - Level 2"""
+        if self.status_validasi != 'validated_1':
+            raise ValidationError('Can only validate level-1 approved profiles')
+
+        from django.utils import timezone
+        self.status_validasi = StatusValidasi.VALIDATED_2
+        self.validasi_2_pada = timezone.now()
+        self.validasi_2_oleh = validator_user
+        self.validasi_2_notes = notes
+        self.save()
+
+    def reject(self, validator_user, reason):
+        """Koordinator rejects - Level 2"""
+        if self.status_validasi != 'validated_1':
+            raise ValidationError('Can only reject level-1 approved profiles')
+
+        from django.utils import timezone
+        self.status_validasi = StatusValidasi.REJECTED
+        self.validated_2_at = timezone.now()
+        self.validated_2_by = validator_user
+        self.rejection_reason = reason
+        self.save()
+
+    def final_approve(self):
+        """Final approval - ready to apply for jobs"""
+        if self.status_validasi != 'validated_2':
+            raise ValidationError('Must pass both validations first')
+
+        from django.utils import timezone
+        self.status_validasi = StatusValidasi.APPROVED
+        self.approved_at = timezone.now()
+        self.save()
+
+    def suspend(self, reason):
+        """Suspend peserta"""
+        self.status_validasi = StatusValidasi.SUSPENDED
+        self.rejection_reason = reason
+        self.save()
+
+    @property
+    def can_apply_jobs(self):
+        """Check if peserta can apply for jobs"""
+        return self.status_validasi == StatusValidasi.APPROVED
+
+    @property
+    def validation_progress(self):
+        """Get validation progress percentage"""
+        status_weight = {
+            'draft': 0,
+            'submitted': 20,
+            'validated_1': 50,
+            'validated_2': 80,
+            'approved': 100,
+            'rejected_1': 0,
+            'rejected_2': 0,
+            'suspended': 0,
+        }
+        return status_weight.get(self.status_validasi, 0)
 
 
 class RiwayatPendidikan(models.Model):
@@ -214,6 +291,10 @@ class RiwayatPendidikan(models.Model):
         ordering = ['-tahun_lulus']
         verbose_name = "Riwayat Pendidikan"
         verbose_name_plural = 'Riwayat Pendidikan'
+        unique_together = ('peserta', 'jenjang', 'nama_institusi')
+
+    def __str__(self):
+        return f"{self.peserta.nama_lengkap} - {self.jenjang} - {self.nama_institusi}"
 
 
 class RiwayatPekerjaan(models.Model):
@@ -241,6 +322,9 @@ class RiwayatPekerjaan(models.Model):
         db_table = 'riwayat_pekerjaan'
         ordering = ['-tanggal_masuk']
         verbose_name_plural = 'Riwayat Pekerjaan'
+    
+    def __str__(self):
+        return f"{self.peserta.nama_lengkap} - {self.jabatan} di {self.nama_perusahaan}"
 
 
 class DataKeluarga(models.Model):
@@ -263,6 +347,17 @@ class DataKeluarga(models.Model):
         verbose_name = "Data Keluarga"
         verbose_name_plural = 'Data Keluarga'
 
+    @property
+    def usia(self):
+        today = date.today()
+        age = today.year - self.tanggal_lahir.year
+        if (today.month, today.day) < (self.tanggal_lahir.month, self.tanggal_lahir.day):
+            age -= 1
+        return age
+
+    def __str__(self):
+        return f"{self.peserta.nama_lengkap} - {self.hubungan_keluarga}"
+
 
 class DokumenPeserta(models.Model):
     peserta = models.ForeignKey(
@@ -273,7 +368,7 @@ class DokumenPeserta(models.Model):
     jenis_dokumen = models.CharField(
         "Jenis Dokumen",
         max_length=50,
-        choices=DokumenPeserta,
+        choices=DokumenPesertaChoices,
         blank=False
     )
     nama_dokumen = models.CharField("Nama Dokumen", max_length=50, blank=False)
@@ -284,3 +379,6 @@ class DokumenPeserta(models.Model):
         db_table = 'dokumen_peserta'
         verbose_name = "Dokumen Peserta"
         verbose_name_plural = 'Dokumen Peserta'
+
+    def __str__(self):
+        return f"{self.peserta.nama_lengkap} - {self.jenis_dokumen}"

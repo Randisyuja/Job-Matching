@@ -6,6 +6,7 @@ class StatusValidasi(models.TextChoices):
     VALIDATED_1 = "Validasi 1", "Validasi 1"
     VALIDATED_2 = "Validasi 2", "Validasi 2"
     APPROVED = "Approved", "Approved"
+    REJECTED = "Rejected", "Rejected"
     SUSPENDED = "Suspended", "Suspended"
 
 
@@ -64,8 +65,9 @@ class HubunganKeluarga(models.TextChoices):
     SAUDARA = "Saudara", "Saudara"
 
 
-class DokumenPeserta(models.TextChoices):
+class DokumenPesertaChoices(models.TextChoices):
     JLPT = "JLPT", "JLPT"
     JFT = "JFT", "JFT"
     SSW = "SSW", "SSW"
     JITCO = "JITCO", "JITCO"
+    FOTO = "FOTO PROFIL", "FOTO PROFIL"
