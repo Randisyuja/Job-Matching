@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2>Form Lowongan</h2>
+
+<form method="post">
+    {% csrf_token %}
+
+    <h4>Data Lowongan</h4>
+    {{ form.as_p }}
+
+    <hr>
+
+    <h4>Persyaratan</h4>
+
+    {{ formset.management_form }}
+
+    {% for subform in formset %}
+        <div class="card mb-2 p-2">
+            {{ subform.as_p }}
+        </div>
+    {% endfor %}
+
+    <button class="btn btn-success">Simpan</button>
+
+</form>
+
+{% endblock %}

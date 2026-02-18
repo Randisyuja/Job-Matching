@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2>Lowongan</h2>
+
+<a href="{% url 'lowongan_create' %}" class="btn btn-primary mb-3">Tambah</a>
+
+<form method="get" class="mb-3">
+    <select name="is_active" onchange="this.form.submit()" class="form-select w-25">
+        <option value="">Semua</option>
+        <option value="true">Aktif</option>
+        <option value="false">Non Aktif</option>
+    </select>
+</form>
+
+<table class="table table-striped">
+    <tr>
+        <th>Perusahaan</th>
+        <th>Jenis</th>
+        <th>Kuota</th>
+        <th>Status</th>
+        <th>Aksi</th>
+    </tr>
+
+    {% for obj in page_obj %}
+    <tr>
+        <td>{{ obj.nama_perusahaan }}</td>
+        <td>{{ obj.jenis_pekerjaan.nama_pekerjaan }}</td>
+        <td>{{ obj.kuota }}</td>
+        <td>
+            {% if obj.is_active %}
+                <span class="badge bg-success">Aktif</span>
+            {% else %}
+                <span class="badge bg-secondary">Non Aktif</span>
+            {% endif %}
+        </td>
+        <td>
+            <a href="{% url 'lowongan_detail' obj.pk %}" class="btn btn-sm btn-info">Detail</a>
+            <a href="{% url 'lowongan_update' obj.pk %}" class="btn btn-sm btn-warning">Edit</a>
+            
+            <form method="post" action="{% url 'lowongan_delete' obj.pk %}" style="display:inline;">
+                {% csrf_token %}
+                <button class="btn btn-sm btn-danger">Hapus</button>
+            </form>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+
+<div>
+    {% if page_obj.has_previous %}
+        <a href="?page={{ page_obj.previous_page_number }}" class="btn btn-sm btn-outline-primary">Previous</a>
+    {% endif %}
+
+    Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+
+    {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}" class="btn btn-sm btn-outline-primary">Next</a>
+    {% endif %}
+</div>
+
+{% endblock %}

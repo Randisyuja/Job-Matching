@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2>{{ obj.nama_perusahaan }}</h2>
+
+<p><strong>Jenis:</strong> {{ obj.jenis_pekerjaan.nama_pekerjaan }}</p>
+<p><strong>Lokasi:</strong> {{ obj.lokasi_kerja }}</p>
+<p><strong>Kuota:</strong> {{ obj.kuota }}</p>
+<p><strong>Deskripsi:</strong> {{ obj.deskripsi_pekerjaan }}</p>
+
+<hr>
+
+<h4>Persyaratan</h4>
+<ul>
+    {% for item in persyaratan %}
+        <li>{{ item.name }}</li>
+    {% empty %}
+        <li>Tidak ada persyaratan</li>
+    {% endfor %}
+</ul>
+
+{% endblock %}
