@@ -10,7 +10,7 @@ from .serializers import (
     LowonganDetailSerializer,
     PersyaratanSerializer
 )
-from ..services import LowonganService
+from .services import LowonganService
 
 
 class JenisPekerjaanViewSet(viewsets.ModelViewSet):
