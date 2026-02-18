@@ -1,0 +1,226 @@
+from django.views import View
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.contrib import messages
+from django.core.exceptions import ValidationError
+from django.core.paginator import Paginator
+
+
+from .models import JenisPekerjaan, Lowongan, Persyaratan
+from .forms import (
+    JenisPekerjaanForm,
+    LowonganForm,
+    PersyaratanForm,
+    PersyaratanFormSet
+)
+from . import services as svc
+
+
+class StaffRequiredMixin(UserPassesTestMixin):
+    def test_func(self):
+        return self.request.user.is_staff
+
+
+class JenisListView(View):
+    def get(self, request):
+        data = JenisPekerjaan.objects.all()
+        return render(request, "jobs/jenis_list.html", {"data": data})
+
+
+class JenisCreateView(View):
+
+    def get(self, request):
+        form = JenisPekerjaanForm()
+        return render(request, "jobs/jenis_form.html", {"form": form})
+
+    def post(self, request):
+        form = JenisPekerjaanForm(request.POST, request.FILES)
+
+        if form.is_valid():
+            svc.create_jenis(form)
+            messages.success(request, "Berhasil ditambahkan")
+            return redirect("jenis_list")
+
+        return render(request, "jobs/jenis_form.html", {"form": form})
+
+
+class JenisUpdateView(View):
+
+    def get(self, request, pk):
+        obj = get_object_or_404(JenisPekerjaan, pk=pk)
+        form = JenisPekerjaanForm(instance=obj)
+        return render(request, "jobs/jenis_form.html", {"form": form})
+
+    def post(self, request, pk):
+        obj = get_object_or_404(JenisPekerjaan, pk=pk)
+        form = JenisPekerjaanForm(request.POST, request.FILES, instance=obj)
+
+        if form.is_valid():
+            svc.update_jenis(form)
+            messages.success(request, "Berhasil diupdate")
+            return redirect("jenis_list")
+
+        return render(request, "jobs/jenis_form.html", {"form": form})
+
+
+class JenisDeleteView(View):
+
+    def post(self, request, pk):
+        obj = get_object_or_404(JenisPekerjaan, pk=pk)
+
+        try:
+            svc.delete_jenis(obj)
+            messages.success(request, "Berhasil dihapus")
+        except ValidationError as e:
+            messages.error(request, e.message)
+
+        return redirect("jenis_list")
+
+
+class LowonganListView(View):
+    def get(self, request):
+        is_active = request.GET.get("is_active")
+
+        if is_active == "True":
+            data = svc.get_active_lowongan(True)
+        elif is_active == "False":
+            data = svc.get_active_lowongan(False)
+        else:
+            data = svc.get_all_lowongan()
+
+        paginator = Paginator(data, 5)
+        page_number = request.GET.get("page")
+        page_obj = paginator.get_page(page_number)
+
+        context = {
+            "page_obj": page_obj
+        }
+
+        return render(request, "jobs/lowongan_list.html", context)
+
+
+class LowonganDetailView(View):
+    def get(self, request, pk):
+        lowongan, persyaratan = svc.get_lowongan_detail(pk)
+
+        context = {
+            "obj": lowongan,
+            "persyaratan": persyaratan
+        }
+
+        return render(request, "jobs/lowongan_detail.html", context)
+
+
+class LowonganCreateView(View):
+
+    def get(self, request):
+        form = LowonganForm()
+        formset = PersyaratanFormSet()
+
+        context = {
+            "form": form,
+            "formset": formset
+        }
+
+        return render(request, "jobs/lowongan_form.html", context)
+
+    def post(self, request):
+        form = LowonganForm(request.POST)
+        formset = PersyaratanFormSet(request.POST)
+
+        if form.is_valid() and formset.is_valid():
+            svc.create_lowongan(form, formset, request.user)
+            messages.success(request, "Lowongan berhasil dibuat")
+            return redirect("lowongan_list")
+
+        context = {
+            "form": form,
+            "formset": formset
+        }
+
+        return render(request, "jobs/lowongan_form.html", context)
+
+
+class LowonganUpdateView(View):
+
+    def get(self, request, pk):
+        obj = get_object_or_404(Lowongan, pk=pk)
+        form = LowonganForm(instance=obj)
+        return render(request, "jobs/lowongan_form.html", {"form": form})
+
+    def post(self, request, pk):
+        obj = get_object_or_404(Lowongan, pk=pk)
+        form = LowonganForm(request.POST, instance=obj)
+
+        if form.is_valid():
+            svc.update_lowongan(form, request.user)
+            messages.success(request, "Lowongan berhasil diupdate")
+            return redirect("lowongan_list")
+
+        return render(request, "jobs/lowongan_form.html", {"form": form})
+
+
+class LowonganDeleteView(View):
+
+    def post(self, request, pk):
+        obj = get_object_or_404(Lowongan, pk=pk)
+        svc.delete_lowongan(obj)
+        messages.success(request, "Lowongan berhasil dihapus")
+        return redirect("lowongan_list")
+
+
+class PersyaratanListView(View):
+    def get(self, request):
+        data = Persyaratan.objects.all()
+        return render(request, "jobs/persyaratan_list.html", {"data": data})
+
+
+class PersyaratanCreateView(LoginRequiredMixin, StaffRequiredMixin, View):
+
+    def get(self, request):
+        form = PersyaratanForm()
+        return render(request, "jobs/persyaratan_form.html", {"form": form})
+
+    def post(self, request):
+        form = PersyaratanForm(request.POST)
+
+        if form.is_valid():
+            try:
+                svc.create_persyaratan(form)
+                messages.success(request, "Berhasil ditambahkan")
+                return redirect("persyaratan_list")
+            except ValidationError as e:
+                form.add_error(None, e.message)
+
+        return render(request, "jobs/persyaratan_form.html", {"form": form})
+
+
+class PersyaratanUpdateView(LoginRequiredMixin, StaffRequiredMixin, View):
+
+    def get(self, request, pk):
+        obj = get_object_or_404(Persyaratan, pk=pk)
+        form = PersyaratanForm(instance=obj)
+        return render(request, "jobs/persyaratan_form.html", {"form": form})
+
+    def post(self, request, pk):
+        obj = get_object_or_404(Persyaratan, pk=pk)
+        form = PersyaratanForm(request.POST, instance=obj)
+
+        if form.is_valid():
+            try:
+                svc.update_persyaratan(form)
+                messages.success(request, "Berhasil diupdate")
+                return redirect("persyaratan_list")
+            except ValidationError as e:
+                form.add_error(None, e.message)
+
+        return render(request, "jobs/persyaratan_form.html", {"form": form})
+
+
+class PersyaratanDeleteView(LoginRequiredMixin, StaffRequiredMixin, View):
+
+    def post(self, request, pk):
+        obj = get_object_or_404(Persyaratan, pk=pk)
+        svc.delete_persyaratan(obj)
+        messages.success(request, "Berhasil dihapus")
+        return redirect("persyaratan_list")
