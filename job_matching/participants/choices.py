@@ -25,7 +25,7 @@ class Agama(models.TextChoices):
 
 
 class StatusPernikahan(models.TextChoices):
-    LAJANG = "LAJANG", "LAJANG"
+    LAJANG = "Lajang", "Lajang"
     MENIKAH = "Menikah", "Menikah"
     CERAIMATI = "Cerai Mati", "Cerai Mati"
     CERAIHIDUP = "Cerai Hidup", "Cerai Hidup"

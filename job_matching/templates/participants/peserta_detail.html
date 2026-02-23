@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h3>Detail Peserta</h3>
+
+<div class="card mb-4">
+    <div class="card-body">
+        <h5>{{ peserta.nama_lengkap }}</h5>
+        <p>Email: {{ peserta.user.email }}</p>
+        <p>Usia: {{ peserta.usia }}</p>
+        <p>Status: <strong>{{ peserta.status_validasi }}</strong></p>
+    </div>
+</div>
+
+<!-- Pendidikan -->
+<h5>Riwayat Pendidikan</h5>
+<ul class="list-group mb-4">
+    {% for item in peserta.riwayat_pendidikan.all %}
+        <li class="list-group-item">
+            {{ item.jenjang }} - {{ item.nama_institusi }}
+            ({{ item.tahun_masuk }} - {{ item.tahun_lulus }})
+        </li>
+    {% empty %}
+        <li class="list-group-item">Belum ada data</li>
+    {% endfor %}
+</ul>
+
+<!-- Pekerjaan -->
+<h5>Riwayat Pekerjaan</h5>
+<ul class="list-group mb-4">
+    {% for item in peserta.riwayat_pekerjaan.all %}
+        <li class="list-group-item">
+            {{ item.jabatan }} di {{ item.nama_perusahaan }} {{ item.tanggal_masuk }} - {{ item.tanggal_keluar }}
+        </li>
+    {% empty %}
+        <li class="list-group-item">Belum ada data</li>
+    {% endfor %}
+</ul>
+
+<!-- Keluarga -->
+<h5>Data Keluarga</h5>
+<ul class="list-group mb-4">
+    {% for item in peserta.data_keluarga.all %}
+        <li class="list-group-item">
+            {{ item.hubungan_keluarga }} - Usia {{ item.usia }}
+        </li>
+    {% empty %}
+        <li class="list-group-item">Belum ada data</li>
+    {% endfor %}
+</ul>
+
+<!-- Dokumen -->
+<h5>Dokumen</h5>
+<ul class="list-group mb-4">
+    {% for item in peserta.dokumen.all %}
+        <li class="list-group-item">
+            {{ item.jenis_dokumen }} -
+            <a href="{{ item.file_path.url }}" target="_blank">
+                Lihat File
+            </a>
+        </li>
+    {% empty %}
+        <li class="list-group-item">Belum ada dokumen</li>
+    {% endfor %}
+</ul>
+
+<!-- Validation Buttons -->
+<div class="mt-4">
+    <form method="post" action="{% url 'validate_1' peserta.pk %}">
+        {% csrf_token %}
+        <button class="btn btn-primary">Validate Level 1</button>
+    </form>
+</div>
+
+{% endblock %}

@@ -132,7 +132,7 @@ class Peserta(models.Model):
         "Status Validasi",
         choices=StatusValidasi,
         default=StatusValidasi.DIAJUKAN,
-        db_index= True
+        db_index=True
     )
 
     validasi_1_pada = models.DateTimeField('Tanggal Validasi 1', null=True, blank=True)
@@ -322,7 +322,7 @@ class RiwayatPekerjaan(models.Model):
         db_table = 'riwayat_pekerjaan'
         ordering = ['-tanggal_masuk']
         verbose_name_plural = 'Riwayat Pekerjaan'
-    
+
     def __str__(self):
         return f"{self.peserta.nama_lengkap} - {self.jabatan} di {self.nama_perusahaan}"
 
