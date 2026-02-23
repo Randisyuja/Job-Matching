@@ -51,6 +51,6 @@ PersyaratanFormSet = inlineformset_factory(
     Lowongan,
     Persyaratan,
     fields=("name",),
-    extra=3,
-    can_delete=True
+    extra=1,
+    can_delete=False
 )

@@ -11,15 +11,47 @@
 
     <hr>
 
-    <h4>Persyaratan</h4>
-
-    {{ formset.management_form }}
-
-    {% for subform in formset %}
-        <div class="card mb-2 p-2">
-            {{ subform.as_p }}
+    <!-- Persyaratan -->
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between">
+            <span>Persyaratan</span>
+            <button type="button"
+                    class="btn btn-sm btn-primary add-form"
+                    data-prefix="{{ formset.prefix }}">
+                + Tambah
+            </button>
         </div>
-    {% endfor %}
+
+        <div class="card-body">
+
+            {{ formset.management_form }}
+
+            <div class="formset-container"
+                id="formset-{{ formset.prefix }}"
+                data-prefix="{{ formset.prefix }}">
+
+                {% for form in formset %}
+                    <div class="formset-item border p-3 mb-2">
+                        {{ form.as_p }}
+                        <button type="button" class="btn btn-danger btn-sm remove-form">
+                            Hapus
+                        </button>
+                    </div>
+                {% endfor %}
+
+            </div>
+
+            <!-- Empty template -->
+            <template id="empty-form-{{ formset.prefix }}">
+                <div class="formset-item border p-3 mb-2">
+                    {{ formset.empty_form.as_p|safe }}
+                    <button type="button" class="btn btn-danger btn-sm remove-form">
+                        Hapus
+                    </button>
+                </div>
+            </template>
+        </div>
+    </div>
 
     <button class="btn btn-success">Simpan</button>
 

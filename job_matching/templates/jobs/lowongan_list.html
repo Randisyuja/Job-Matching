@@ -17,6 +17,7 @@
     <tr>
         <th>Perusahaan</th>
         <th>Jenis</th>
+        <th>Lokasi</th>
         <th>Kuota</th>
         <th>Status</th>
         <th>Aksi</th>
@@ -26,6 +27,7 @@
     <tr>
         <td>{{ obj.nama_perusahaan }}</td>
         <td>{{ obj.jenis_pekerjaan.nama_pekerjaan }}</td>
+        <td>{{ obj.lokasi_kerja }}</td>
         <td>{{ obj.kuota }}</td>
         <td>
             {% if obj.is_active %}
