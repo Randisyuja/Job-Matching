@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h3>Detail Lamaran</h3>
+
+<div class="card mb-4">
+    <div class="card-body">
+
+        <h5>{{ lamaran.peserta.nama_lengkap }}</h5>
+
+        <p>
+            <strong>Lowongan:</strong>
+            {{ lamaran.lowongan.nama_perusahaan }}
+            - {{ lamaran.lowongan.jenis_pekerjaan.nama_pekerjaan }}
+        </p>
+
+        <p>
+            <strong>Status:</strong>
+            <span class="badge bg-primary">
+                {{ lamaran.status_lamaran }}
+            </span>
+        </p>
+
+        <p>
+            <strong>Catatan:</strong><br>
+            {{ lamaran.catatan|default:"-" }}
+        </p>
+
+        <p>
+            <strong>Dibuat:</strong>
+            {{ lamaran.created_at }}
+        </p>
+
+    </div>
+</div>
+
+<a href="{% url 'lamaran_status' lamaran.pk %}"
+   class="btn btn-warning">
+    Update Status
+</a>
+
+<a href="{% url 'lamaran_list' %}"
+   class="btn btn-secondary">
+    Kembali
+</a>
+
+{% endblock %}

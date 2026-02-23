@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h3>Daftar Lamaran</h3>
+
+<div class="d-flex justify-content-between mb-3">
+
+    <a href="{% url 'lamaran_create' %}" class="btn btn-primary">
+        + Buat Lamaran
+    </a>
+
+    <form method="get" class="d-flex">
+        <select name="status" class="form-select me-2">
+            <option value="">Semua Status</option>
+            <option value="pending">Pending</option>
+            <option value="diproses">Diproses</option>
+            <option value="diterima">Diterima</option>
+            <option value="ditolak">Ditolak</option>
+        </select>
+        <button class="btn btn-secondary">Filter</button>
+    </form>
+
+</div>
+
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>Peserta</th>
+            <th>Lowongan</th>
+            <th>Status</th>
+            <th>Tanggal</th>
+            <th>Aksi</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {% for item in data %}
+        <tr>
+            <td>{{ item.peserta.nama_lengkap }}</td>
+            <td>
+                {{ item.lowongan.nama_perusahaan }} -
+                {{ item.lowongan.jenis_pekerjaan.nama_pekerjaan }}
+            </td>
+            <td>
+                <span class="badge bg-info">
+                    {{ item.status_lamaran }}
+                </span>
+            </td>
+            <td>{{ item.created_at }}</td>
+            <td>
+                <a href="{% url 'lamaran_detail' item.pk %}" class="btn btn-sm btn-info">
+                    Detail
+                </a>
+
+                <a href="{% url 'lamaran_status' item.pk %}" class="btn btn-sm btn-warning">
+                    Update Status
+                </a>
+
+                <form method="post"
+                      action="{% url 'lamaran_delete' item.pk %}"
+                      style="display:inline;">
+                    {% csrf_token %}
+                    <button class="btn btn-sm btn-danger">
+                        Hapus
+                    </button>
+                </form>
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="5" class="text-center">
+                Belum ada lamaran
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<!-- Pagination -->
+<nav>
+    <ul class="pagination">
+        {% if data.has_previous %}
+        <li class="page-item">
+            <a class="page-link"
+               href="?page={{ data.previous_page_number }}">
+                Previous
+            </a>
+        </li>
+        {% endif %}
+
+        <li class="page-item active">
+            <span class="page-link">
+                {{ data.number }}
+            </span>
+        </li>
+
+        {% if data.has_next %}
+        <li class="page-item">
+            <a class="page-link"
+               href="?page={{ data.next_page_number }}">
+                Next
+            </a>
+        </li>
+        {% endif %}
+    </ul>
+</nav>
+
+{% endblock %}
