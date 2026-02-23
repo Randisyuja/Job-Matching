@@ -49,8 +49,7 @@ class Staff(models.Model):
     )
     is_active = models.BooleanField(
         "Aktif",
-        max_length=50,
-        blank=False
+        default=True
     )
 
     class Meta:
@@ -59,4 +58,4 @@ class Staff(models.Model):
         verbose_name_plural = "Staff"
 
     def __str__(self):
-        return f"{self.name} - {self.jabatan}"
+        return f"{self.nama} - {self.jabatan}"

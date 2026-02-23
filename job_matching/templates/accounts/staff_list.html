@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2>Staff</h2>
+
+<a href="{% url 'staff_create' %}" class="btn btn-primary mb-3">Tambah Staff</a>
+
+<table class="table table-bordered">
+<tr>
+    <th>Email</th>
+    <th>Nama</th>
+    <th>Jabatan</th>
+    <th>Unit</th>
+    <th>Status</th>
+    <th>Aksi</th>
+</tr>
+
+{% for item in data %}
+<tr>
+    <td>{{ item.user.email }}</td>
+    <td>{{ item.nama }}</td>
+    <td>{{ item.jabatan }}</td>
+    <td>{{ item.unit_kerja }}</td>
+    <td>
+        {% if item.user.is_active %}
+            <span class="badge bg-success">Aktif</span>
+        {% else %}
+            <span class="badge bg-danger">Nonaktif</span>
+        {% endif %}
+    </td>
+    <td>
+        <a href="{% url 'staff_update' item.pk %}" class="btn btn-warning btn-sm">Edit</a>
+        <form method="post" action="{% url 'staff_delete' item.pk %}" style="display:inline;">
+            {% csrf_token %}
+            <button class="btn btn-danger btn-sm">Nonaktifkan</button>
+        </form>
+    </td>
+</tr>
+{% endfor %}
+</table>
+
+{% endblock %}

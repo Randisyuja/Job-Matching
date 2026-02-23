@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2>Users</h2>
+
+<a href="{% url 'user_create' %}" class="btn btn-primary mb-3">Tambah User</a>
+
+<table class="table table-bordered">
+<tr>
+    <th>ID</th>
+    <th>Email</th>
+    <th>Status</th>
+    <th>Tanggal Dibuat</th>
+    <th>Aksi</th>
+</tr>
+
+{% for user in users %}
+<tr>
+    <td>{{ user.id }}</td>
+    <td>{{ user.email }}</td>
+    <td>
+        {% if user.is_active %}
+            <span class="badge bg-success">Aktif</span>
+        {% else %}
+            <span class="badge bg-danger">Nonaktif</span>
+        {% endif %}
+    </td>
+    <td>{{ user.created_at }}</td>
+    <td>
+        <a href="{% url 'user_update' user.pk %}" class="btn btn-warning btn-sm">Edit</a>
+        <form method="post" action="{% url 'user_delete' user.pk %}" style="display:inline;">
+            {% csrf_token %}
+            <button class="btn btn-danger btn-sm">Nonaktifkan</button>
+        </form>
+    </td>
+</tr>
+{% endfor %}
+</table>
+
+{% endblock %}
