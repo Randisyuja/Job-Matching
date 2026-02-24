@@ -21,6 +21,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 AUTH_USER_MODEL = "accounts.User"
 
+AUTHENTICATION_BACKENDS = [
+    "django.contrib.auth.backends.ModelBackend",
+]
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
@@ -28,9 +32,13 @@ AUTH_USER_MODEL = "accounts.User"
 SECRET_KEY = "django-insecure-@g!q+ll1j*(=873eau2u9=1b9huy&=s+p_6npi#k2fm_3w^8a9"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv("DEBUG")
 
 ALLOWED_HOSTS = []
+
+LOGIN_URL = "login"
+LOGIN_REDIRECT_URL = "peserta_list"
+LOGOUT_REDIRECT_URL = "login"
 
 
 # Application definition
@@ -46,8 +54,8 @@ INSTALLED_APPS = [
     "participants",
     "jobs",
     "applications",
-    "partners"
-
+    "partners",
+    "rest_framework"
 ]
 
 MIDDLEWARE = [
@@ -62,10 +70,25 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = "job_matching.urls"
 
+REST_FRAMEWORK = {
+    'DEFAULT_RENDERER_CLASSES': [
+        'rest_framework.renderers.JSONRenderer',
+        'rest_framework.renderers.BrowsableAPIRenderer',
+    ],
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.SessionAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        "rest_framework.permissions.AllowAny",
+    ],
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 20,
+}
+
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": [BASE_DIR / 'templates'],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -127,7 +150,6 @@ USE_TZ = True
 
 MEDIA_ROOT = BASE_DIR / 'media'
 MEDIA_URL = '/media/'
-
 
 
 # Static files (CSS, JavaScript, Images)

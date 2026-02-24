@@ -8,9 +8,83 @@
 
     <!-- Tailwind CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
     <!-- Google Font -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+
+            function updateTotalForms(prefix, increment=true) {
+                const totalFormsInput = document.querySelector(
+                    `#id_${prefix}-TOTAL_FORMS`
+                );
+
+                let total = parseInt(totalFormsInput.value);
+
+                totalFormsInput.value = increment ? total + 1 : total - 1;
+            }
+
+            // ADD FORM
+            document.querySelectorAll(".add-form").forEach(button => {
+                button.addEventListener("click", function () {
+
+                    const prefix = this.dataset.prefix;
+                    const container = document.querySelector(
+                        `#formset-${prefix}`
+                    );
+
+                    const template = document.querySelector(
+                        `#empty-form-${prefix}`
+                    );
+
+                    const totalFormsInput = document.querySelector(
+                        `#id_${prefix}-TOTAL_FORMS`
+                    );
+
+                    let formIndex = parseInt(totalFormsInput.value);
+
+                    let newFormHtml = template.innerHTML.replace(
+                        /__prefix__/g,
+                        formIndex
+                    );
+
+                    container.insertAdjacentHTML("beforeend", newFormHtml);
+
+                    updateTotalForms(prefix, true);
+                });
+            });
+
+            // REMOVE FORM (delegation)
+            document.addEventListener("click", function (e) {
+                if (e.target.classList.contains("remove-form")) {
+
+                    const formItem = e.target.closest(".formset-item");
+                    const container = e.target.closest(".formset-container");
+                    const prefix = container.dataset.prefix;
+
+                    const totalFormsInput = document.querySelector(
+                        `#id_${prefix}-TOTAL_FORMS`
+                    );
+
+                    let total = parseInt(totalFormsInput.value);
+
+                    // If existing form (has id field), mark DELETE instead
+                    const deleteInput = formItem.querySelector("input[type='checkbox'][name$='-DELETE']");
+
+                    if (deleteInput) {
+                        deleteInput.checked = true;
+                        formItem.style.display = "none";
+                    } else {
+                        formItem.remove();
+                        totalFormsInput.value = total - 1;
+                    }
+                }
+            });
+
+        });
+    </script>
 
     <style>
         body { font-family: 'Inter', sans-serif; }
@@ -21,14 +95,60 @@
     <!-- Navbar -->
     <nav class="bg-white shadow-sm fixed w-full z-50">
         <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-            <a href="/" class="text-2xl font-bold text-indigo-600">JobPortal</a>
+            <a href="{% url 'home' %}" class="text-2xl font-bold text-indigo-600">JobPortal</a>
             <div class="space-x-6 hidden md:flex">
                 <a href="#" class="hover:text-indigo-600">Lowongan</a>
-                <a href="#" class="hover:text-indigo-600">Perusahaan</a>
-                <a href="#" class="hover:text-indigo-600">Tentang</a>
-                <a href="#" class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition">
-                    Login
-                </a>
+                <!-- Dropdown -->
+                <div class="relative"
+                    x-data="{ open: false }"
+                    @keydown.escape.window="open = false"
+                    @click.outside="open = false">
+
+                    <!-- Button -->
+                    <button @click="open = !open"
+                            type="button"
+                            class="flex items-center hover:text-indigo-600 transition focus:outline-none">
+                        Menu
+                        <svg class="w-4 h-4 ml-1 transition-transform duration-200"
+                            :class="{ 'rotate-180': open }"
+                            fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" 
+                                stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </button>
+
+                    <!-- Dropdown Content -->
+                    <div x-show="open"
+                        x-transition:enter="transition ease-out duration-200"
+                        x-transition:enter-start="opacity-0 translate-y-2"
+                        x-transition:enter-end="opacity-100 translate-y-0"
+                        x-transition:leave="transition ease-in duration-150"
+                        x-transition:leave-start="opacity-100 translate-y-0"
+                        x-transition:leave-end="opacity-0 translate-y-2"
+                        x-cloak
+                        class="absolute left-0 mt-3 w-52 bg-white rounded-xl shadow-lg py-2 z-50">
+
+                        <a href="{% url 'jenis_list'%}" class="block px-4 py-2 hover:bg-gray-100">
+                            Jenis Pekerjaan
+                        </a>
+                        <a href="{% url 'lowongan_list'%}" class="block px-4 py-2 hover:bg-gray-100">
+                            Lowongan
+                        </a>
+                    </div>
+                </div>
+                <a href="{% url 'peserta_create'%}" class="hover:text-indigo-600">Tentang</a>
+                {% if user.is_authenticated %}
+                    <form method="post" action="{% url 'logout' %}">
+                        {% csrf_token %}
+                        <button class="btn btn-outline-light btn-sm">
+                            Logout
+                        </button>
+                    </form>
+                {% else %}
+                    <a href="{% url 'login' %}" class="btn btn-outline-light btn-sm">
+                        Login
+                    </a>
+                {% endif %}
             </div>
         </div>
     </nav>
