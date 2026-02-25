@@ -1,64 +1,110 @@
 {% extends "base.html" %}
+
+{% block title %}Lowongan Pekerjaan{% endblock %}
+
 {% block content %}
+<section class="max-w-7xl mx-auto px-6 py-8">
+	<div class="flex items-center justify-between mb-6">
+		<h1 class="text-3xl font-bold text-gray-900">Lowongan Pekerjaan</h1>
+		{% if user.is_staff %}
+			<a href="{% url 'lowongan_create' %}"
+			   class="inline-flex items-center px-4 py-2 rounded-lg bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-700">
+				+ Tambah Lowongan
+			</a>
+		{% endif %}
+	</div>
 
-<h2>Lowongan</h2>
+	<!-- Filter -->
+	<div class="mb-6">
+		<form method="get" class="flex gap-3">
+			<select name="is_active"
+					onchange="this.form.submit()"
+					class="rounded-lg border border-gray-300 px-4 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+				<option value="">Semua Status</option>
+				<option value="True" {% if request.GET.is_active == 'True' %}selected{% endif %}>Aktif</option>
+				<option value="False" {% if request.GET.is_active == 'False' %}selected{% endif %}>Non Aktif</option>
+			</select>
+		</form>
+	</div>
 
-<a href="{% url 'lowongan_create' %}" class="btn btn-primary mb-3">Tambah</a>
+	<!-- Card Grid -->
+	<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+		{% for obj in page_obj %}
+			<a href="{% url 'lowongan_detail' obj.pk %}"
+			   class="block bg-white rounded-xl border border-gray-200 hover:shadow-lg hover:border-indigo-300 transition-all duration-200 overflow-hidden group">
+				<div class="p-6">
+					<div class="flex items-start justify-between mb-3">
+						<h3 class="text-lg font-semibold text-gray-900 group-hover:text-indigo-600">
+							{{ obj.nama_perusahaan }}
+						</h3>
+						{% if obj.is_active %}
+							<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+								Aktif
+							</span>
+						{% else %}
+							<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+								Tutup
+							</span>
+						{% endif %}
+					</div>
 
-<form method="get" class="mb-3">
-    <select name="is_active" onchange="this.form.submit()" class="form-select w-25">
-        <option value="">Semua</option>
-        <option value="true">Aktif</option>
-        <option value="false">Non Aktif</option>
-    </select>
-</form>
+					<div class="space-y-2 text-sm text-gray-600 mb-4">
+						<div class="flex items-center">
+							<svg class="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+							</svg>
+							{{ obj.jenis_pekerjaan.nama_pekerjaan }}
+						</div>
+						<div class="flex items-center">
+							<svg class="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+							</svg>
+							{{ obj.lokasi_kerja }}
+						</div>
+						<div class="flex items-center">
+							<svg class="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+							</svg>
+							Kuota: {{ obj.sisa_kuota }}/{{ obj.kuota }}
+						</div>
+					</div>
 
-<table class="table table-striped">
-    <tr>
-        <th>Perusahaan</th>
-        <th>Jenis</th>
-        <th>Lokasi</th>
-        <th>Kuota</th>
-        <th>Status</th>
-        <th>Aksi</th>
-    </tr>
+					<div class="pt-3 border-t border-gray-100">
+						<p class="text-xs text-gray-500">
+							Batas lamar: <span class="font-medium text-gray-700">{{ obj.batas_lamar|date:"d M Y" }}</span>
+						</p>
+					</div>
+				</div>
+			</a>
+		{% empty %}
+			<div class="col-span-full text-center py-12">
+				<p class="text-gray-500">Tidak ada lowongan tersedia.</p>
+			</div>
+		{% endfor %}
+	</div>
 
-    {% for obj in page_obj %}
-    <tr>
-        <td>{{ obj.nama_perusahaan }}</td>
-        <td>{{ obj.jenis_pekerjaan.nama_pekerjaan }}</td>
-        <td>{{ obj.lokasi_kerja }}</td>
-        <td>{{ obj.kuota }}</td>
-        <td>
-            {% if obj.is_active %}
-                <span class="badge bg-success">Aktif</span>
-            {% else %}
-                <span class="badge bg-secondary">Non Aktif</span>
-            {% endif %}
-        </td>
-        <td>
-            <a href="{% url 'lowongan_detail' obj.pk %}" class="btn btn-sm btn-info">Detail</a>
-            <a href="{% url 'lowongan_update' obj.pk %}" class="btn btn-sm btn-warning">Edit</a>
-            
-            <form method="post" action="{% url 'lowongan_delete' obj.pk %}" style="display:inline;">
-                {% csrf_token %}
-                <button class="btn btn-sm btn-danger">Hapus</button>
-            </form>
-        </td>
-    </tr>
-    {% endfor %}
-</table>
+	<!-- Pagination -->
+	{% if page_obj.paginator.num_pages > 1 %}
+		<div class="flex items-center justify-center gap-2">
+			{% if page_obj.has_previous %}
+				<a href="?page={{ page_obj.previous_page_number }}{% if request.GET.is_active %}&is_active={{ request.GET.is_active }}{% endif %}"
+				   class="inline-flex items-center px-4 py-2 rounded-lg border border-gray-300 text-sm font-medium text-gray-700 hover:bg-gray-50">
+					Previous
+				</a>
+			{% endif %}
 
-<div>
-    {% if page_obj.has_previous %}
-        <a href="?page={{ page_obj.previous_page_number }}" class="btn btn-sm btn-outline-primary">Previous</a>
-    {% endif %}
+			<span class="px-4 py-2 text-sm text-gray-600">
+				Halaman {{ page_obj.number }} dari {{ page_obj.paginator.num_pages }}
+			</span>
 
-    Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
-
-    {% if page_obj.has_next %}
-        <a href="?page={{ page_obj.next_page_number }}" class="btn btn-sm btn-outline-primary">Next</a>
-    {% endif %}
-</div>
-
+			{% if page_obj.has_next %}
+				<a href="?page={{ page_obj.next_page_number }}{% if request.GET.is_active %}&is_active={{ request.GET.is_active }}{% endif %}"
+				   class="inline-flex items-center px-4 py-2 rounded-lg border border-gray-300 text-sm font-medium text-gray-700 hover:bg-gray-50">
+					Next
+				</a>
+			{% endif %}
+		</div>
+	{% endif %}
+</section>
 {% endblock %}

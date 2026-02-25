@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block content %}
 
-<h3>Form Peserta</h3>
+<h3>{% if is_update %}Edit Profil Peserta{% else %}Form Peserta Baru{% endif %}</h3>
 
 <form method="post" enctype="multipart/form-data">
     {% csrf_token %}
