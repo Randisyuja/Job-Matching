@@ -108,7 +108,7 @@ class PesertaUpdateView(LoginRequiredMixin, View):
 
     def get(self, request, pk):
         peserta = get_object_or_404(Peserta, pk=pk)
-        
+
         form = forms.PesertaForm(instance=peserta)
         pendidikan = forms.RiwayatPendidikanFormSet(instance=peserta)
         pekerjaan = forms.RiwayatPekerjaanFormSet(instance=peserta)
