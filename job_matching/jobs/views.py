@@ -110,6 +110,64 @@ class LowonganDetailView(View):
 
         return render(request, "jobs/lowongan_detail.html", context)
 
+    def post(self, request, pk):
+        from applications.models import Lamaran
+        from django.core.exceptions import (
+            ValidationError as DjangoValidationError
+        )
+        
+        lowongan, persyaratan = svc.get_lowongan_detail(pk)
+        catatan = request.POST.get("catatan", "")
+
+        try:
+            # Check if user has peserta profile
+            if not hasattr(request.user, 'peserta_profile'):
+                messages.error(
+                    request,
+                    "Anda harus memiliki profil peserta untuk melamar."
+                )
+                return redirect("lowongan_detail", pk=pk)
+
+            peserta = request.user.peserta_profile
+
+            # Check if already applied
+            if Lamaran.objects.filter(
+                peserta=peserta,
+                lowongan=lowongan
+            ).exists():
+                messages.warning(
+                    request,
+                    "Anda sudah pernah melamar lowongan ini."
+                )
+                return redirect("lowongan_detail", pk=pk)
+
+            # Create lamaran
+            lamaran = Lamaran(
+                peserta=peserta,
+                lowongan=lowongan,
+                catatan=catatan,
+                created_by=request.user,
+                updated_by=request.user
+            )
+            lamaran.save()
+
+            messages.success(
+                request,
+                "Lamaran berhasil dikirim! Anda dapat memantau status "
+                "lamaran di halaman lamaran Anda."
+            )
+            return redirect("lamaran_list")
+
+        except (ValueError, DjangoValidationError) as e:
+            messages.error(request, str(e))
+            return redirect("lowongan_detail", pk=pk)
+        except Exception as e:
+            messages.error(
+                request,
+                f"Terjadi kesalahan: {str(e)}"
+            )
+            return redirect("lowongan_detail", pk=pk)
+
 
 class LowonganCreateView(View):
 

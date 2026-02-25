@@ -31,7 +31,12 @@ class LamaranListView(LoginRequiredMixin, View):
         page = request.GET.get("page")
         data = paginator.get_page(page)
 
-        return render(request, "applications/list.html", {
+        # Gunakan template berbeda untuk peserta vs staff
+        template = "applications/lamaran_peserta.html"
+        if request.user.is_staff:
+            template = "applications/list.html"
+
+        return render(request, template, {
             "data": data
         })
 
@@ -40,6 +45,12 @@ class LamaranCreateView(LoginRequiredMixin, View):
 
     def get(self, request):
         form = LamaranCreateForm()
+
+        # Pre-fill lowongan field if provided in query string
+        lowongan_id = request.GET.get("lowongan")
+        if lowongan_id:
+            form.initial["lowongan"] = lowongan_id
+
         return render(request, "applications/form.html", {"form": form})
 
     def post(self, request):

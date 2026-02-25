@@ -16,7 +16,7 @@ def create_peserta(
 ):
     peserta = peserta_form.save(commit=False)
     peserta.user = user
-    peserta.updated_by = user
+    peserta.created_by = user
     peserta.save()
 
     pendidikan_formset.instance = peserta
@@ -82,3 +82,38 @@ def validate_level_2(peserta: Peserta, validator_user, notes=""):
 
 def final_approve(peserta):
     peserta.final_approve()
+
+
+def update_validation_status(
+    peserta: Peserta,
+    validator_user,
+    status,
+    notes="",
+):
+    valid_statuses = {choice[0] for choice in StatusValidasi.choices}
+    if status not in valid_statuses:
+        raise ValidationError("Status validasi tidak dikenali")
+
+    peserta.status_validasi = status
+    peserta.updated_by = validator_user
+
+    if status == StatusValidasi.VALIDATED_1:
+        peserta.validasi_1_pada = timezone.now()
+        peserta.validasi_1_oleh = validator_user
+        peserta.validasi_1_notes = notes
+
+    if status in [
+        StatusValidasi.VALIDATED_2,
+        StatusValidasi.APPROVED,
+        StatusValidasi.REJECTED,
+        StatusValidasi.SUSPENDED,
+    ]:
+        peserta.validasi_2_pada = timezone.now()
+        peserta.validasi_2_oleh = validator_user
+        peserta.validasi_2_notes = notes
+
+    if status in [StatusValidasi.REJECTED, StatusValidasi.SUSPENDED]:
+        peserta.alasan_penolakan = notes
+
+    peserta.save()
+    return peserta
