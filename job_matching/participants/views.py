@@ -38,7 +38,7 @@ class PesertaCreateView(LoginRequiredMixin, View):
         keluarga = forms.DataKeluargaFormSet()
         dokumen = forms.DokumenPesertaFormSet()
 
-        return render(request, "participants/peserta_form.html", {
+        return render(request, "peserta/peserta_form.html", {
             "form": form,
             "pendidikan": pendidikan,
             "pekerjaan": pekerjaan,
@@ -85,7 +85,7 @@ class PesertaCreateView(LoginRequiredMixin, View):
             )
             return redirect("peserta_list")
 
-        return render(request, "participants/peserta_form.html", {
+        return render(request, "peserta/peserta_form.html", {
             "form": form,
             "pendidikan": pendidikan,
             "pekerjaan": pekerjaan,
@@ -99,7 +99,7 @@ class PesertaProfileView(LoginRequiredMixin, View):
     def get(self, request, pk):
         peserta = get_object_or_404(Peserta, pk=pk)
 
-        return render(request, "participants/profil_peserta.html", {
+        return render(request, "peserta/profil_peserta.html", {
             "peserta": peserta
         })
 
@@ -115,7 +115,7 @@ class PesertaUpdateView(LoginRequiredMixin, View):
         keluarga = forms.DataKeluargaFormSet(instance=peserta)
         dokumen = forms.DokumenPesertaFormSet(instance=peserta)
 
-        return render(request, "participants/peserta_form.html", {
+        return render(request, "peserta/peserta_form.html", {
             "form": form,
             "pendidikan": pendidikan,
             "pekerjaan": pekerjaan,
@@ -162,7 +162,7 @@ class PesertaUpdateView(LoginRequiredMixin, View):
             messages.success(request, "Profil berhasil diperbarui.")
             return redirect("peserta_profile", pk=pk)
 
-        return render(request, "participants/peserta_form.html", {
+        return render(request, "peserta/peserta_form.html", {
             "form": form,
             "pendidikan": pendidikan,
             "pekerjaan": pekerjaan,
@@ -186,7 +186,7 @@ class PesertaDetailView(LoginRequiredMixin, View):
     def get(self, request, pk):
         peserta = get_object_or_404(Peserta, pk=pk)
 
-        return render(request, "staff/peserta_detail.html", {
+        return render(request, "peserta/peserta_detail.html", {
             "peserta": peserta,
             "status_choices": StatusValidasi.choices,
         })

@@ -11,9 +11,11 @@ from . import services
 User = get_user_model()
 
 
-def homepage(request):
-    return render(request, template_name='homepage.html')
+def homepage_peserta(request):
+    return render(request, template_name='peserta/homepage.html')
 
+def homepage_staff(request):
+    return render(request, template_name='staff/homepage.html')
 
 class StaffRequiredMixin(UserPassesTestMixin):
     def test_func(self):

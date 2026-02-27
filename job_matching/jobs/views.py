@@ -4,6 +4,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib import messages
 from django.core.exceptions import ValidationError
 from django.core.paginator import Paginator
+from django.db.models import Count
 
 
 from .models import JenisPekerjaan, Lowongan, Persyaratan
@@ -23,8 +24,10 @@ class StaffRequiredMixin(UserPassesTestMixin):
 
 class JenisListView(View):
     def get(self, request):
-        data = JenisPekerjaan.objects.all()
-        return render(request, "jobs/jenis_list.html", {"data": data})
+        data = JenisPekerjaan.objects.annotate(
+            total_lowongan=Count("lowongan")
+        )
+        return render(request, "peserta/jenis_list.html", {"data": data})
 
 
 class JenisCreateView(View):
@@ -80,6 +83,8 @@ class JenisDeleteView(View):
 class LowonganListView(View):
     def get(self, request):
         is_active = request.GET.get("is_active")
+        jenis_id = request.GET.get("jenis_id")
+        selected_jenis = None
 
         if is_active == "True":
             data = svc.get_active_lowongan(True)
@@ -88,15 +93,20 @@ class LowonganListView(View):
         else:
             data = svc.get_all_lowongan()
 
+        if jenis_id:
+            data = data.filter(jenis_pekerjaan_id=jenis_id)
+            selected_jenis = JenisPekerjaan.objects.filter(pk=jenis_id).first()
+
         paginator = Paginator(data, 5)
         page_number = request.GET.get("page")
         page_obj = paginator.get_page(page_number)
 
         context = {
-            "page_obj": page_obj
+            "page_obj": page_obj,
+            "selected_jenis": selected_jenis,
         }
 
-        return render(request, "jobs/lowongan_list.html", context)
+        return render(request, "peserta/lowongan_list.html", context)
 
 
 class LowonganDetailView(View):
@@ -108,14 +118,14 @@ class LowonganDetailView(View):
             "persyaratan": persyaratan
         }
 
-        return render(request, "jobs/lowongan_detail.html", context)
+        return render(request, "peserta/lowongan_detail.html", context)
 
     def post(self, request, pk):
         from applications.models import Lamaran
         from django.core.exceptions import (
             ValidationError as DjangoValidationError
         )
-        
+
         lowongan, persyaratan = svc.get_lowongan_detail(pk)
         catatan = request.POST.get("catatan", "")
 

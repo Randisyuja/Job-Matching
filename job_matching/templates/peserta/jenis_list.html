@@ -1,0 +1,53 @@
+{% extends "peserta/homepage.html" %}
+{% load static %}
+{% block content %}
+
+<section class="max-w-7xl mx-auto px-6 py-8">
+    <div class="flex items-center justify-between mb-6">
+        <h1 class="text-3xl font-bold text-gray-900">Jenis Pekerjaan</h1>
+        {% if user.is_staff %}
+            <a href="{% url 'jenis_create' %}"
+               class="inline-flex items-center px-4 py-2 rounded-lg bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-700">
+                + Tambah Jenis
+            </a>
+        {% endif %}
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {% for item in data %}
+            <div class="bg-white rounded-xl border border-gray-200 hover:shadow-lg hover:border-indigo-300 transition-all duration-200 overflow-hidden">
+                <a href="{% url 'lowongan_list' %}?jenis_id={{ item.pk }}" class="block h-80">
+                    <div class="h-4/5 bg-gray-100">
+                        {% if item.file_path %}
+                            <img src="{{ item.file_path.url }}" alt="{{ item.nama_pekerjaan }}" class="w-full h-full object-cover">
+                        {% else %}
+                            <div class="w-full h-full flex items-center justify-center text-sm text-gray-400">
+                                Tidak ada gambar
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="h-1/5 px-4 py-3 flex flex-col justify-center">
+                        <h3 class="text-base font-semibold text-gray-900 truncate">{{ item.nama_pekerjaan }}</h3>
+                        <p class="text-sm text-gray-500">Klik untuk daftar lowongan</p>
+                    </div>
+                </a>
+
+                {% if user.is_staff %}
+                    <div class="px-6 pb-6 flex items-center gap-2">
+                        <a href="{% url 'jenis_update' item.pk %}" class="inline-flex items-center px-3 py-1.5 rounded-lg bg-amber-100 text-amber-700 text-sm font-medium hover:bg-amber-200">Edit</a>
+                        <form method="post" action="{% url 'jenis_delete' item.pk %}">
+                            {% csrf_token %}
+                            <button class="inline-flex items-center px-3 py-1.5 rounded-lg bg-red-100 text-red-700 text-sm font-medium hover:bg-red-200">Hapus</button>
+                        </form>
+                    </div>
+                {% endif %}
+            </div>
+        {% empty %}
+            <div class="col-span-full text-center py-12">
+                <p class="text-gray-500">Belum ada jenis pekerjaan.</p>
+            </div>
+        {% endfor %}
+    </div>
+</section>
+
+{% endblock %}

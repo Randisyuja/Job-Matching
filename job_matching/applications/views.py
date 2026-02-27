@@ -32,7 +32,7 @@ class LamaranListView(LoginRequiredMixin, View):
         data = paginator.get_page(page)
 
         # Gunakan template berbeda untuk peserta vs staff
-        template = "applications/lamaran_peserta.html"
+        template = "peserta/lamaran_peserta.html"
         if request.user.is_staff:
             template = "applications/list.html"
 
@@ -71,7 +71,7 @@ class LamaranDetailView(LoginRequiredMixin, View):
 
     def get(self, request, pk):
         lamaran = get_object_or_404(Lamaran, pk=pk)
-        return render(request, "applications/detail.html", {
+        return render(request, "peserta/detail.html", {
             "lamaran": lamaran
         })
 

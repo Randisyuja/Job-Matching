@@ -1,11 +1,19 @@
-{% extends "base.html" %}
+{% extends "peserta/homepage.html" %}
 
 {% block title %}Lowongan Pekerjaan{% endblock %}
 
 {% block content %}
 <section class="max-w-7xl mx-auto px-6 py-8">
 	<div class="flex items-center justify-between mb-6">
-		<h1 class="text-3xl font-bold text-gray-900">Lowongan Pekerjaan</h1>
+		<div>
+			<h1 class="text-3xl font-bold text-gray-900">Lowongan Pekerjaan</h1>
+			{% if selected_jenis %}
+				<p class="mt-1 text-sm text-gray-600">
+					Filter jenis: <span class="font-medium text-indigo-700">{{ selected_jenis.nama_pekerjaan }}</span>
+					<a href="{% url 'lowongan_list' %}" class="ml-2 text-indigo-600 hover:text-indigo-700">Reset</a>
+				</p>
+			{% endif %}
+		</div>
 		{% if user.is_staff %}
 			<a href="{% url 'lowongan_create' %}"
 			   class="inline-flex items-center px-4 py-2 rounded-lg bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-700">
@@ -17,6 +25,9 @@
 	<!-- Filter -->
 	<div class="mb-6">
 		<form method="get" class="flex gap-3">
+			{% if request.GET.jenis_id %}
+				<input type="hidden" name="jenis_id" value="{{ request.GET.jenis_id }}">
+			{% endif %}
 			<select name="is_active"
 					onchange="this.form.submit()"
 					class="rounded-lg border border-gray-300 px-4 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
@@ -88,7 +99,7 @@
 	{% if page_obj.paginator.num_pages > 1 %}
 		<div class="flex items-center justify-center gap-2">
 			{% if page_obj.has_previous %}
-				<a href="?page={{ page_obj.previous_page_number }}{% if request.GET.is_active %}&is_active={{ request.GET.is_active }}{% endif %}"
+				<a href="?page={{ page_obj.previous_page_number }}{% if request.GET.is_active %}&is_active={{ request.GET.is_active }}{% endif %}{% if request.GET.jenis_id %}&jenis_id={{ request.GET.jenis_id }}{% endif %}"
 				   class="inline-flex items-center px-4 py-2 rounded-lg border border-gray-300 text-sm font-medium text-gray-700 hover:bg-gray-50">
 					Previous
 				</a>
@@ -99,7 +110,7 @@
 			</span>
 
 			{% if page_obj.has_next %}
-				<a href="?page={{ page_obj.next_page_number }}{% if request.GET.is_active %}&is_active={{ request.GET.is_active }}{% endif %}"
+				<a href="?page={{ page_obj.next_page_number }}{% if request.GET.is_active %}&is_active={{ request.GET.is_active }}{% endif %}{% if request.GET.jenis_id %}&jenis_id={{ request.GET.jenis_id }}{% endif %}"
 				   class="inline-flex items-center px-4 py-2 rounded-lg border border-gray-300 text-sm font-medium text-gray-700 hover:bg-gray-50">
 					Next
 				</a>
