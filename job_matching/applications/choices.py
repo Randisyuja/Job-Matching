@@ -8,5 +8,5 @@ class StatusLamaran(models.TextChoices):
     MENDAN1 = "Mendan 1", "Mendan 1"
     MENDAN2 = "Mendan 2", "Mendan 2"
     MENSETSU = "Mensetsu", "Mensetsu"
-    GOUKAKU = "GOUKAKU", "GOUKAKU"
-    FUGOUKAKU = "FU GOKAKU", "FU GOUKAKU"
+    GOUKAKU = "Goukaku", "Goukaku"
+    FUGOUKAKU = "Fu Goukaku", "Fu Goukaku"

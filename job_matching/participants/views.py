@@ -11,7 +11,7 @@ from . import forms
 from . import services
 
 
-class PesertaListView(LoginRequiredMixin, View):
+class StaffPesertaListView(LoginRequiredMixin, View):
 
     def get(self, request):
         queryset = Peserta.objects.select_related("user")
@@ -26,6 +26,26 @@ class PesertaListView(LoginRequiredMixin, View):
 
         return render(request, "staff/peserta_list.html", {
             "data": data
+        })
+
+
+class StaffPesertaStatusListView(LoginRequiredMixin, View):
+    status_value = ""
+    template_name = ""
+    page_title = ""
+
+    def get(self, request):
+        queryset = Peserta.objects.select_related("user").filter(
+            status_validasi=self.status_value
+        )
+
+        paginator = Paginator(queryset.order_by("-updated_at"), 10)
+        page = request.GET.get("page")
+        data = paginator.get_page(page)
+
+        return render(request, self.template_name, {
+            "data": data,
+            "page_title": self.page_title,
         })
 
 

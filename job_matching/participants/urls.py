@@ -2,7 +2,43 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    path("", views.PesertaListView.as_view(), name="peserta_list"),
+    path("", views.StaffPesertaListView.as_view(), name="staff_peserta_list"),
+    path(
+        "validasi-1/",
+        views.StaffPesertaStatusListView.as_view(
+            status_value=views.StatusValidasi.VALIDATED_1,
+            template_name="staff/validasi_1.html",
+            page_title="Peserta Validasi 1",
+        ),
+        name="staff_validasi_1",
+    ),
+    path(
+        "validasi-2/",
+        views.StaffPesertaStatusListView.as_view(
+            status_value=views.StatusValidasi.VALIDATED_2,
+            template_name="staff/validasi_2.html",
+            page_title="Peserta Validasi 2",
+        ),
+        name="staff_validasi_2",
+    ),
+    path(
+        "disetujui/",
+        views.StaffPesertaStatusListView.as_view(
+            status_value=views.StatusValidasi.APPROVED,
+            template_name="staff/peserta_disetujui.html",
+            page_title="Peserta Disetujui",
+        ),
+        name="staff_peserta_disetujui",
+    ),
+    path(
+        "ditolak/",
+        views.StaffPesertaStatusListView.as_view(
+            status_value=views.StatusValidasi.REJECTED,
+            template_name="staff/peserta_ditolak.html",
+            page_title="Peserta Ditolak",
+        ),
+        name="staff_peserta_ditolak",
+    ),
     path(
         "tambah/",
         views.PesertaCreateView.as_view(),
