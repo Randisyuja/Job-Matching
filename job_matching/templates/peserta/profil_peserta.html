@@ -1,10 +1,36 @@
-{% extends "peserta/homepage.html" %}
+{% extends "peserta/peserta_base.html" %}
 
 {% block content %}
 <section class="max-w-7xl mx-auto px-6 py-8 space-y-6">
+	{% if is_incomplete %}
+	<div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+		<div class="flex">
+			<div class="flex-shrink-0">
+				<svg class="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+					<path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+				</svg>
+			</div>
+			<div class="ml-3">
+				<h3 class="text-sm font-medium text-yellow-800">
+					Data Peserta Belum Lengkap
+				</h3>
+				<div class="mt-2 text-sm text-yellow-700">
+					<p>
+						Profil peserta belum dibuat. Silakan lengkapi data peserta untuk melanjutkan.
+						<a href="{% url 'peserta_create' %}" class="font-medium underline text-yellow-700 hover:text-yellow-600">
+							Buat Profil Peserta
+						</a>
+					</p>
+				</div>
+			</div>
+		</div>
+	</div>
+	{% endif %}
+
 	<div class="flex items-center justify-between">
 		<h1 class="text-2xl font-semibold text-gray-900">Profil Peserta</h1>
 		<div class="flex items-center gap-3">
+			{% if peserta %}
 			<a href="{% url 'peserta_update' peserta.pk %}"
 			   class="inline-flex items-center px-4 py-2 rounded-lg bg-indigo-600 text-sm font-medium text-white hover:bg-indigo-700">
 				<svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -12,6 +38,15 @@
 				</svg>
 				Edit Profil
 			</a>
+			{% else %}
+			<a href="{% url 'peserta_create' %}"
+			   class="inline-flex items-center px-4 py-2 rounded-lg bg-indigo-600 text-sm font-medium text-white hover:bg-indigo-700">
+				<svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+				</svg>
+				Buat Profil
+			</a>
+			{% endif %}
 			<a href="{% url 'peserta_list' %}"
 			   class="inline-flex items-center px-4 py-2 rounded-lg border border-gray-300 text-sm font-medium text-gray-700 hover:bg-gray-50">
 				Kembali ke Daftar
@@ -19,49 +54,51 @@
 		</div>
 	</div>
 
+	{% if peserta %}
+
 	<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 		<div class="lg:col-span-2 bg-white rounded-xl border border-gray-200 p-6">
 			<h2 class="text-lg font-semibold text-gray-900 mb-4">Data Diri</h2>
 			<dl class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
 				<div>
 					<dt class="text-gray-500">Nama Lengkap</dt>
-					<dd class="font-medium text-gray-900">{{ peserta.nama_lengkap }}</dd>
+					<dd class="font-medium text-gray-900">{% if peserta.nama_lengkap %}{{ peserta.nama_lengkap }}{% else %}<span class="text-gray-400">Masukkan Nama Lengkap Anda</span>{% endif %}</dd>
 				</div>
 				<div>
 					<dt class="text-gray-500">Nama Katakana</dt>
-					<dd class="font-medium text-gray-900">{{ peserta.nama_lengkap_katakana }}</dd>
+					<dd class="font-medium text-gray-900">{% if peserta.nama_lengkap_katakana %}{{ peserta.nama_lengkap_katakana }}{% else %}<span class="text-gray-400">Masukkan Nama Katakana Anda</span>{% endif %}</dd>
 				</div>
 				<div>
 					<dt class="text-gray-500">Tanggal Lahir</dt>
-					<dd class="font-medium text-gray-900">{{ peserta.tanggal_lahir|date:"d M Y" }}</dd>
+					<dd class="font-medium text-gray-900">{% if peserta.tanggal_lahir %}{{ peserta.tanggal_lahir|date:"d M Y" }}{% else %}<span class="text-gray-400">Masukkan Tanggal Lahir Anda</span>{% endif %}</dd>
 				</div>
 				<div>
 					<dt class="text-gray-500">Usia</dt>
-					<dd class="font-medium text-gray-900">{{ peserta.usia }} tahun</dd>
+					<dd class="font-medium text-gray-900">{% if peserta.usia %}{{ peserta.usia }} tahun{% else %}<span class="text-gray-400">Masukkan Usia Anda</span>{% endif %}</dd>
 				</div>
 				<div>
 					<dt class="text-gray-500">Jenis Kelamin</dt>
-					<dd class="font-medium text-gray-900">{{ peserta.get_jenis_kelamin_display }}</dd>
+					<dd class="font-medium text-gray-900">{% if peserta.jenis_kelamin %}{{ peserta.get_jenis_kelamin_display }}{% else %}<span class="text-gray-400">Masukkan Jenis Kelamin Anda</span>{% endif %}</dd>
 				</div>
 				<div>
 					<dt class="text-gray-500">Agama</dt>
-					<dd class="font-medium text-gray-900">{{ peserta.get_agama_display }}</dd>
+					<dd class="font-medium text-gray-900">{% if peserta.agama %}{{ peserta.get_agama_display }}{% else %}<span class="text-gray-400">Masukkan Agama Anda</span>{% endif %}</dd>
 				</div>
 				<div>
 					<dt class="text-gray-500">Nomor HP</dt>
-					<dd class="font-medium text-gray-900">{{ peserta.nomor_hp }}</dd>
+					<dd class="font-medium text-gray-900">{% if peserta.nomor_hp %}{{ peserta.nomor_hp }}{% else %}<span class="text-gray-400">Masukkan Nomor HP Anda</span>{% endif %}</dd>
 				</div>
 				<div>
 					<dt class="text-gray-500">Status Pernikahan</dt>
-					<dd class="font-medium text-gray-900">{{ peserta.get_status_pernikahan_display }}</dd>
+					<dd class="font-medium text-gray-900">{% if peserta.status_pernikahan %}{{ peserta.get_status_pernikahan_display }}{% else %}<span class="text-gray-400">Masukkan Status Pernikahan Anda</span>{% endif %}</dd>
 				</div>
 				<div class="md:col-span-2">
 					<dt class="text-gray-500">Alamat KTP</dt>
-					<dd class="font-medium text-gray-900">{{ peserta.alamat_ktp }}</dd>
+					<dd class="font-medium text-gray-900">{% if peserta.alamat_ktp %}{{ peserta.alamat_ktp }}{% else %}<span class="text-gray-400">Masukkan Alamat KTP Anda</span>{% endif %}</dd>
 				</div>
 				<div class="md:col-span-2">
 					<dt class="text-gray-500">Alamat Domisili</dt>
-					<dd class="font-medium text-gray-900">{{ peserta.alamat_domisili }}</dd>
+					<dd class="font-medium text-gray-900">{% if peserta.alamat_domisili %}{{ peserta.alamat_domisili }}{% else %}<span class="text-gray-400">Masukkan Alamat Domisili Anda</span>{% endif %}</dd>
 				</div>
 			</dl>
 		</div>
@@ -99,39 +136,39 @@
 		<dl class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
 			<div>
 				<dt class="text-gray-500">Minat Program</dt>
-				<dd class="font-medium text-gray-900">{{ peserta.minat_program }}</dd>
+				<dd class="font-medium text-gray-900">{% if peserta.minat_program %}{{ peserta.minat_program }}{% else %}<span class="text-gray-400">Masukkan Minat Program Anda</span>{% endif %}</dd>
 			</div>
 			<div>
 				<dt class="text-gray-500">Tujuan ke Jepang</dt>
-				<dd class="font-medium text-gray-900">{{ peserta.tujuan_ke_jepang }}</dd>
+				<dd class="font-medium text-gray-900">{% if peserta.tujuan_ke_jepang %}{{ peserta.tujuan_ke_jepang }}{% else %}<span class="text-gray-400">Masukkan Tujuan ke Jepang Anda</span>{% endif %}</dd>
 			</div>
 			<div class="md:col-span-2">
 				<dt class="text-gray-500">Pengalaman ke Jepang</dt>
-				<dd class="font-medium text-gray-900">{{ peserta.pengalaman_ke_jepang }}</dd>
+				<dd class="font-medium text-gray-900">{% if peserta.pengalaman_ke_jepang %}{{ peserta.pengalaman_ke_jepang }}{% else %}<span class="text-gray-400">Masukkan Pengalaman ke Jepang Anda</span>{% endif %}</dd>
 			</div>
 			<div>
 				<dt class="text-gray-500">Golongan Darah</dt>
-				<dd class="font-medium text-gray-900">{{ peserta.get_golongan_darah_display }}</dd>
+				<dd class="font-medium text-gray-900">{% if peserta.golongan_darah %}{{ peserta.get_golongan_darah_display }}{% else %}<span class="text-gray-400">Masukkan Golongan Darah Anda</span>{% endif %}</dd>
 			</div>
 			<div>
 				<dt class="text-gray-500">Tangan Dominan</dt>
-				<dd class="font-medium text-gray-900">{{ peserta.get_tangan_dominan_display }}</dd>
+				<dd class="font-medium text-gray-900">{% if peserta.tangan_dominan %}{{ peserta.get_tangan_dominan_display }}{% else %}<span class="text-gray-400">Masukkan Tangan Dominan Anda</span>{% endif %}</dd>
 			</div>
 			<div>
 				<dt class="text-gray-500">Tinggi / Berat</dt>
-				<dd class="font-medium text-gray-900">{{ peserta.tinggi_badan }} cm / {{ peserta.berat_badan }} kg</dd>
+				<dd class="font-medium text-gray-900">{% if peserta.tinggi_badan and peserta.berat_badan %}{{ peserta.tinggi_badan }} cm / {{ peserta.berat_badan }} kg{% else %}<span class="text-gray-400">Masukkan Tinggi dan Berat Badan Anda</span>{% endif %}</dd>
 			</div>
 			<div>
 				<dt class="text-gray-500">Cek Mata</dt>
-				<dd class="font-medium text-gray-900">Kanan: {{ peserta.cek_mata_kanan }} | Kiri: {{ peserta.cek_mata_kiri }}</dd>
+				<dd class="font-medium text-gray-900">{% if peserta.cek_mata_kanan and peserta.cek_mata_kiri %}Kanan: {{ peserta.cek_mata_kanan }} | Kiri: {{ peserta.cek_mata_kiri }}{% else %}<span class="text-gray-400">Masukkan Cek Mata Anda</span>{% endif %}</dd>
 			</div>
 			<div class="md:col-span-2">
 				<dt class="text-gray-500">Riwayat Penyakit</dt>
-				<dd class="font-medium text-gray-900">{{ peserta.riwayat_penyakit }}</dd>
+				<dd class="font-medium text-gray-900">{% if peserta.riwayat_penyakit %}{{ peserta.riwayat_penyakit }}{% else %}<span class="text-gray-400">Masukkan Riwayat Penyakit Anda</span>{% endif %}</dd>
 			</div>
 			<div class="md:col-span-2">
 				<dt class="text-gray-500">Alergi / Pantangan Makanan</dt>
-				<dd class="font-medium text-gray-900">{{ peserta.alergi_makanan }} / {{ peserta.pantangan_makanan }}</dd>
+				<dd class="font-medium text-gray-900">{% if peserta.alergi_makanan or peserta.pantangan_makanan %}{{ peserta.alergi_makanan }} / {{ peserta.pantangan_makanan }}{% else %}<span class="text-gray-400">Masukkan Alergi dan Pantangan Makanan Anda</span>{% endif %}</dd>
 			</div>
 		</dl>
 	</div>
@@ -231,4 +268,5 @@
 		</div>
 	</div>
 </section>
+{% endif %}
 {% endblock %}

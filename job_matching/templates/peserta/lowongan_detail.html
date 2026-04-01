@@ -1,4 +1,4 @@
-{% extends "peserta/homepage.html" %}
+{% extends "peserta/peserta_base.html" %}
 
 {% block title %}{{ obj.nama_perusahaan }} - Detail Lowongan{% endblock %}
 
@@ -109,7 +109,7 @@
 
 			<!-- Action Buttons -->
 			<div class="flex items-center gap-3 pt-6 border-t border-gray-200">
-				{% if user.is_authenticated and not user.is_staff %}
+				{% if user.is_authenticated %}
 					{% if obj.is_active and not obj.is_expired and obj.sisa_kuota > 0 %}
 						<button @click="showModal = true"
 								type="button"
@@ -125,21 +125,6 @@
 							Lowongan Ditutup
 						</button>
 					{% endif %}
-				{% endif %}
-
-				{% if user.is_staff %}
-					<a href="{% url 'lowongan_update' obj.pk %}"
-					   class="inline-flex items-center px-5 py-2.5 rounded-lg border border-gray-300 text-sm font-medium text-gray-700 hover:bg-gray-50">
-						Edit
-					</a>
-					<form method="post" action="{% url 'lowongan_delete' obj.pk %}" class="inline-block">
-						{% csrf_token %}
-						<button type="submit"
-								onclick="return confirm('Yakin ingin menghapus lowongan ini?')"
-								class="inline-flex items-center px-5 py-2.5 rounded-lg border border-red-300 text-sm font-medium text-red-600 hover:bg-red-50">
-							Hapus
-						</button>
-					</form>
 				{% endif %}
 			</div>
 		</div>

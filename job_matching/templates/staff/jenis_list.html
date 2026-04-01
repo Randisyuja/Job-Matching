@@ -1,10 +1,14 @@
-{% extends "peserta/peserta_base.html" %}
+{% extends "staff/staff_base.html" %}
 {% load static %}
 {% block content %}
 
 <section class="max-w-7xl mx-auto px-6 py-8">
     <div class="flex items-center justify-between mb-6">
         <h1 class="text-3xl font-bold text-gray-900">Jenis Pekerjaan</h1>
+        <a href="{% url 'staff_jenis_create' %}"
+           class="inline-flex items-center px-4 py-2 rounded-lg bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-700">
+            + Tambah Jenis
+        </a>
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -25,6 +29,16 @@
                         <p class="text-sm text-gray-500">Klik untuk daftar lowongan</p>
                     </div>
                 </a>
+
+                {% if user.is_staff %}
+                    <div class="px-6 pb-6 flex items-center gap-2">
+                        <a href="{% url 'staff_jenis_update' item.pk %}" class="inline-flex items-center px-3 py-1.5 rounded-lg bg-amber-100 text-amber-700 text-sm font-medium hover:bg-amber-200">Edit</a>
+                        <form method="post" action="{% url 'staff_jenis_delete' item.pk %}">
+                            {% csrf_token %}
+                            <button class="inline-flex items-center px-3 py-1.5 rounded-lg bg-red-100 text-red-700 text-sm font-medium hover:bg-red-200">Hapus</button>
+                        </form>
+                    </div>
+                {% endif %}
             </div>
         {% empty %}
             <div class="col-span-full text-center py-12">

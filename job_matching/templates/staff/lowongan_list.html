@@ -1,4 +1,4 @@
-{% extends "peserta/peserta_base.html" %}
+{% extends "staff/staff_base.html" %}
 
 {% block title %}Lowongan Pekerjaan{% endblock %}
 
@@ -10,10 +10,16 @@
 			{% if selected_jenis %}
 				<p class="mt-1 text-sm text-gray-600">
 					Filter jenis: <span class="font-medium text-indigo-700">{{ selected_jenis.nama_pekerjaan }}</span>
-					<a href="{% url 'lowongan_list' %}" class="ml-2 text-indigo-600 hover:text-indigo-700">Reset</a>
+					<a href="{% url 'staff_lowongan_list' %}" class="ml-2 text-indigo-600 hover:text-indigo-700">Reset</a>
 				</p>
 			{% endif %}
 		</div>
+		{% if user.is_staff %}
+			<a href="{% url 'staff_lowongan_create' %}"
+			   class="inline-flex items-center px-4 py-2 rounded-lg bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-700">
+				+ Tambah Lowongan
+			</a>
+		{% endif %}
 	</div>
 
 	<!-- Filter -->
@@ -35,7 +41,7 @@
 	<!-- Card Grid -->
 	<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
 		{% for obj in page_obj %}
-			<a href="{% url 'lowongan_detail' obj.pk %}"
+			<a href="{% url 'staff_lowongan_detail' obj.pk %}"
 			   class="block bg-white rounded-xl border border-gray-200 hover:shadow-lg hover:border-indigo-300 transition-all duration-200 overflow-hidden group">
 				<div class="p-6">
 					<div class="flex items-start justify-between mb-3">
