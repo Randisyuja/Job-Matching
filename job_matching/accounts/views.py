@@ -2,7 +2,7 @@ from django.views import View
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.contrib.auth import get_user_model
+from django.contrib.auth import get_user_model, login
 
 from .models import Staff
 from .forms import RegisterForm, LoginForm, UserUpdateForm, StaffForm
@@ -12,6 +12,8 @@ User = get_user_model()
 
 
 def homepage_peserta(request):
+    if request.user.is_authenticated and not hasattr(request.user, 'peserta_profile'):
+        return redirect('peserta_create')
     return render(request, template_name='peserta/homepage.html')
 
 def homepage_staff(request):
@@ -37,11 +39,47 @@ class RegisterView(View):
         form = RegisterForm(request.POST)
 
         if form.is_valid():
-            services.register_user(request, form)
+            user = services.register_user(request, form)
+            role = form.cleaned_data.get('role')
             messages.success(request, "Register berhasil")
             return redirect("login")
 
         return render(request, "register.html", {"form": form})
+
+
+class PesertaRegisterView(View):
+
+    def get(self, request):
+        form = RegisterForm(initial={'role': 'peserta'})
+        return render(request, "register.html", {"form": form, "is_peserta": True})
+
+    def post(self, request):
+        form = RegisterForm(request.POST)
+
+        if form.is_valid():
+            user = services.register_user(request, form)
+            messages.success(request, "Register berhasil sebagai Peserta")
+            login(request, user)
+            return redirect('peserta_create')
+
+        return render(request, "register.html", {"form": form})
+
+
+class StaffRegisterView(View):
+
+    def get(self, request):
+        form = RegisterForm(initial={'role': 'staff'})
+        return render(request, "register.html", {"form": form, "is_staff": True})
+
+    def post(self, request):
+        form = RegisterForm(request.POST)
+
+        if form.is_valid():
+            services.register_user(request, form)
+            messages.success(request, "Register berhasil sebagai Staff")
+            return redirect("login")
+
+        return render(request, "register.html", {"form": form, "is_staff": True})
 
 
 class LoginView(View):

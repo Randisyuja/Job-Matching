@@ -32,6 +32,8 @@ class PesertaForm(forms.ModelForm):
         }
 
 
+
+
 class RiwayatPendidikanForm(forms.ModelForm):
     tahun_masuk = forms.DateField(
         input_formats=["%Y-%m-%d"],

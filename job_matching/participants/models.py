@@ -12,122 +12,80 @@ class Peserta(models.Model):
         primary_key=True,
         related_name='peserta_profile'
     )
-    nama_lengkap = models.CharField(
-        "Nama Lengkap",
-        max_length=50,
-        blank=False
-    )
-    nama_lengkap_katakana = models.CharField(
-        "Nama Lengkap (Katakana)",
-        max_length=50,
-        blank=False
-    )
-    tanggal_lahir = models.DateField(
-        "Tanggal Lahir",
-        blank=False
-    )
+
+    # DATA PRIBADI
+    nama_lengkap = models.CharField("Nama Lengkap", max_length=50, blank=True)
+    nama_lengkap_katakana = models.CharField("Nama Lengkap (Katakana)", max_length=50, blank=True)
+
+    tanggal_lahir = models.DateField("Tanggal Lahir", blank=True, null=True)
+
     jenis_kelamin = models.CharField(
         "Jenis Kelamin",
         max_length=50,
-        choices=JenisKelamin
+        choices=JenisKelamin,
+        blank=True
     )
+
     agama = models.CharField(
         "Agama",
         max_length=50,
-        choices=Agama
+        choices=Agama,
+        blank=True
     )
-    nomor_hp = models.CharField(
-        "Nomor HP",
-        max_length=50
-    )
+
+    nomor_hp = models.CharField("Nomor HP", max_length=50, blank=True)
+
     status_pernikahan = models.CharField(
         "Status Pernikahan",
         max_length=50,
-        choices=StatusPernikahan
+        choices=StatusPernikahan,
+        blank=True
     )
 
-    alamat_ktp = models.TextField(
-        "Alamat KTP",
-        blank=False
-    )
-    alamat_domisili = models.TextField(
-        "Alamat Domisili",
-        blank=False
-    )
-    minat_program = models.CharField(
-        "Minat Program",
-        max_length=50,
-        blank=False
-    )
-    pengalaman_ke_jepang = models.TextField(
-        "Pengalaman ke Jepang",
-        blank=False
-    )
-    tujuan_ke_jepang = models.TextField(
-        "Tujuan ke Jepang",
-        blank=False
-    )
+    # ALAMAT
+    alamat_ktp = models.TextField("Alamat KTP", blank=True)
+    alamat_domisili = models.TextField("Alamat Domisili", blank=True)
 
-    penghasilan_keluarga = models.IntegerField(
-        "Penghasilan Keluarga",
-        blank=False
-    )
-    target_penabungan = models.IntegerField(
-        "Target Penabungan",
-        blank=False
-    )
-    berat_badan = models.IntegerField(
-        'Berat Badan (kg)',
-        blank=False
-    )
-    tinggi_badan = models.IntegerField(
-        'Tinggi Badan (cm)',
-        blank=False
-    )
-    cek_mata_kanan = models.FloatField(
-        'Cek Mata Kanan',
-        blank=False
-    )
-    cek_mata_kiri = models.FloatField(
-        'Cek Mata Kiri',
-        blank=False
-    )
+    # PROGRAM & MOTIVASI
+    minat_program = models.CharField("Minat Program", max_length=50, blank=True)
+    pengalaman_ke_jepang = models.TextField("Pengalaman ke Jepang", blank=True)
+    tujuan_ke_jepang = models.TextField("Tujuan ke Jepang", blank=True)
+
+    # EKONOMI
+    penghasilan_keluarga = models.IntegerField("Penghasilan Keluarga", blank=True, null=True)
+    target_penabungan = models.IntegerField("Target Penabungan", blank=True, null=True)
+
+    # FISIK & KESEHATAN
+    berat_badan = models.IntegerField("Berat Badan (kg)", blank=True, null=True)
+    tinggi_badan = models.IntegerField("Tinggi Badan (cm)", blank=True, null=True)
+
+    cek_mata_kanan = models.FloatField("Cek Mata Kanan", blank=True, null=True)
+    cek_mata_kiri = models.FloatField("Cek Mata Kiri", blank=True, null=True)
+
     golongan_darah = models.CharField(
-        'Golongan Darah',
+        "Golongan Darah",
         max_length=50,
         choices=GolonganDarah,
-        blank=False
+        blank=True
     )
+
     tangan_dominan = models.CharField(
-        'Tangan Dominan',
+        "Tangan Dominan",
         max_length=50,
         choices=TanganDominan,
-        blank=False
+        blank=True
     )
-    alergi_makanan = models.TextField(
-        'Alergi Makanan',
-        blank=False
-    )
-    pantangan_makanan = models.TextField(
-        'Pantangan Makanan',
-        blank=False
-    )
-    riwayat_penyakit = models.TextField(
-        'Riwayat Penyakit',
-        blank=False
-    )
-    kelebihan = models.TextField(
-        'Kelebihan',
-        blank=False
-    )
-    kekurangan = models.TextField(
-        'Kekurangan',
-        blank=False
-    )
-    hobi = models.TextField(
-        'Hobi',
-        blank=False
-    )
+
+    alergi_makanan = models.TextField("Alergi Makanan", blank=True)
+    pantangan_makanan = models.TextField("Pantangan Makanan", blank=True)
+    riwayat_penyakit = models.TextField("Riwayat Penyakit", blank=True)
+
+    # PERSONAL
+    kelebihan = models.TextField("Kelebihan", blank=True)
+    kekurangan = models.TextField("Kekurangan", blank=True)
+    hobi = models.TextField("Hobi", blank=True)
+
+    # STATUS & VALIDASI
     status_validasi = models.CharField(
         "Status Validasi",
         choices=StatusValidasi,
@@ -135,47 +93,55 @@ class Peserta(models.Model):
         db_index=True
     )
 
-    validasi_1_pada = models.DateTimeField('Tanggal Validasi 1', null=True, blank=True)
+    # VALIDASI LEVEL 1
+    validasi_1_pada = models.DateTimeField("Tanggal Validasi 1", null=True, blank=True)
     validasi_1_oleh = models.ForeignKey(
         User,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        related_name='validated_peserta_level_1',
-        verbose_name='Divalidasi 1 Oleh'
+        related_name='validated_peserta_level_1'
     )
-    validasi_1_notes = models.TextField('Catatan Validasi 1', blank=True)
+    validasi_1_notes = models.TextField("Catatan Validasi 1", blank=True)
 
-    validasi_2_pada = models.DateTimeField('Tanggal Validasi 2', null=True, blank=True)
+    # VALIDASI LEVEL 2
+    validasi_2_pada = models.DateTimeField("Tanggal Validasi 2", null=True, blank=True)
     validasi_2_oleh = models.ForeignKey(
         User,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        related_name='validated_peserta_level_2',
-        verbose_name='Divalidasi 2 Oleh'
+        related_name='validated_peserta_level_2'
     )
-    validasi_2_notes = models.TextField('Catatan Validasi 2', blank=True)
+    validasi_2_notes = models.TextField("Catatan Validasi 2", blank=True)
 
-    tervalidasi_pada = models.DateTimeField('Tanggal Approved', null=True, blank=True)
+    # FINAL
+    tervalidasi_pada = models.DateTimeField("Tanggal Approved", null=True, blank=True)
+    alasan_penolakan = models.TextField("Alasan Ditolak", blank=True)
 
-    alasan_penolakan = models.TextField('Alasan Ditolak', blank=True)
-
-    created_at = models.DateTimeField(
-        'Tanggal Dibuat',
-        auto_now_add=True
-    )
-    updated_at = models.DateTimeField(
-        'Tanggal Diupdate',
-        auto_now=True
-    )
+    # META
+    created_at = models.DateTimeField("Tanggal Dibuat", auto_now_add=True)
+    updated_at = models.DateTimeField("Tanggal Diupdate", auto_now=True)
     updated_by = models.ForeignKey(
         User,
         on_delete=models.SET_NULL,
         null=True,
-        related_name='updated_peserta_profiles',
-        verbose_name='Diupdate Oleh'
+        blank=True,
+        related_name='updated_peserta_profiles'
     )
+
+    def is_complete(self):
+        required_fields = [
+            self.nama_lengkap,
+            self.tanggal_lahir,
+            self.nomor_hp,
+            self.alamat_ktp,
+            self.minat_program,
+        ]
+        return all(required_fields)
+
+    def __str__(self):
+        return self.nama_lengkap or self.user.username
 
     class Meta:
         db_table = 'peserta'

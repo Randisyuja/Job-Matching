@@ -51,76 +51,108 @@ class StaffPesertaStatusListView(LoginRequiredMixin, View):
 
 class PesertaCreateView(LoginRequiredMixin, View):
 
-    def get(self, request):
-        form = forms.PesertaForm()
-        pendidikan = forms.RiwayatPendidikanFormSet()
-        pekerjaan = forms.RiwayatPekerjaanFormSet()
-        keluarga = forms.DataKeluargaFormSet()
-        dokumen = forms.DokumenPesertaFormSet()
+    def _peserta_form(self, request):
+        data = request.session.get("peserta_form")
+        if data:
+            return forms.PesertaForm(data)
+        return forms.PesertaForm()
 
-        return render(request, "peserta/peserta_form.html", {
-            "form": form,
-            "pendidikan": pendidikan,
-            "pekerjaan": pekerjaan,
-            "keluarga": keluarga,
-            "dokumen": dokumen
-        })
+    def _pendidikan_formset(self, request):
+        data = request.session.get("pendidikan_form")
+        if data:
+            return forms.RiwayatPendidikanFormSet(data)
+        return forms.RiwayatPendidikanFormSet()
+
+    def _pekerjaan_formset(self, request):
+        data = request.session.get("pekerjaan_form")
+        if data:
+            return forms.RiwayatPekerjaanFormSet(data)
+        return forms.RiwayatPekerjaanFormSet()
+
+    def _keluarga_formset(self, request):
+        data = request.session.get("keluarga_form")
+        if data:
+            return forms.DataKeluargaFormSet(data)
+        return forms.DataKeluargaFormSet()
+
+    def _dokumen_formset(self, request):
+        return forms.DokumenPesertaFormSet()
+
+    def _clear_session(self, request):
+        keys = ["peserta_form", "pendidikan_form", "pekerjaan_form", "keluarga_form"]
+        for key in keys:
+            request.session.pop(key, None)
+
+    def get(self, request):
+        step = request.GET.get("step", "1")
+        context = {
+            "current_step": step,
+            "form": self._peserta_form(request),
+            "pendidikan": self._pendidikan_formset(request),
+            "pekerjaan": self._pekerjaan_formset(request),
+            "keluarga": self._keluarga_formset(request),
+            "dokumen": self._dokumen_formset(request),
+        }
+        return render(request, "peserta/peserta_form.html", context)
 
     def post(self, request):
-        form = forms.PesertaForm(request.POST)
-        pendidikan = forms.RiwayatPendidikanFormSet(request.POST)
-        pekerjaan = forms.RiwayatPekerjaanFormSet(request.POST)
-        keluarga = forms.DataKeluargaFormSet(request.POST)
-        dokumen = forms.DokumenPesertaFormSet(request.POST, request.FILES)
+        step = request.POST.get("step", "1")
 
-        if not form.is_valid():
-            print("FORM ERROR:", form.errors)
+        if step in ["1", "2", "3", "4", "5", "6"]:
+            form = forms.PesertaForm(request.POST)
+            if form.is_valid():
+                request.session["peserta_form"] = request.POST
+                return redirect(f"{request.path}?step={int(step) + 1}")
+            return render(request, "peserta/peserta_form.html", {"form": form, "current_step": step})
 
-        if not pendidikan.is_valid():
-            print("PENDIDIKAN ERROR:", pendidikan.errors)
+        if step == "7":
+            pendidikan = forms.RiwayatPendidikanFormSet(request.POST)
+            if pendidikan.is_valid():
+                request.session["pendidikan_form"] = request.POST
+                return redirect(f"{request.path}?step=8")
+            return render(request, "peserta/peserta_form.html", {"pendidikan": pendidikan, "current_step": step})
 
-        if not pekerjaan.is_valid():
-            print("PEKERJAAN ERROR:", pekerjaan.errors)
+        if step == "8":
+            pekerjaan = forms.RiwayatPekerjaanFormSet(request.POST)
+            keluarga = forms.DataKeluargaFormSet(request.POST)
+            dokumen = forms.DokumenPesertaFormSet(request.POST, request.FILES)
 
-        if not keluarga.is_valid():
-            print("KELUARGA ERROR:", keluarga.errors)
+            peserta = forms.PesertaForm(request.session.get("peserta_form", {}))
+            pendidikan = forms.RiwayatPendidikanFormSet(request.session.get("pendidikan_form", {}))
 
-        if not dokumen.is_valid():
-            print("DOKUMEN ERROR:", dokumen.errors)
+            if all([peserta.is_valid(), pendidikan.is_valid(), pekerjaan.is_valid(), keluarga.is_valid(), dokumen.is_valid()]):
+                services.create_peserta(
+                    request.user,
+                    peserta,
+                    pendidikan,
+                    pekerjaan,
+                    keluarga,
+                    dokumen,
+                )
+                self._clear_session(request)
+                return redirect("peserta_list")
 
-        if all([
-            form.is_valid(),
-            pendidikan.is_valid(),
-            pekerjaan.is_valid(),
-            keluarga.is_valid(),
-            dokumen.is_valid()
-        ]):
-            services.create_peserta(
-                request.user,
-                form,
-                pendidikan,
-                pekerjaan,
-                keluarga,
-                dokumen
-            )
-            return redirect("peserta_list")
+            return render(request, "peserta/peserta_form.html", {
+                "form": peserta,
+                "pendidikan": pendidikan,
+                "pekerjaan": pekerjaan,
+                "keluarga": keluarga,
+                "dokumen": dokumen,
+                "current_step": step,
+            })
 
-        return render(request, "peserta/peserta_form.html", {
-            "form": form,
-            "pendidikan": pendidikan,
-            "pekerjaan": pekerjaan,
-            "keluarga": keluarga,
-            "dokumen": dokumen
-        })
+        return redirect(f"{request.path}?step=1")
 
 
 class PesertaProfileView(LoginRequiredMixin, View):
 
-    def get(self, request, pk):
-        peserta = get_object_or_404(Peserta, pk=pk)
+    def get(self, request):
+        peserta = getattr(request.user, "peserta_profile", None)
+        is_incomplete = peserta is None
 
         return render(request, "peserta/profil_peserta.html", {
-            "peserta": peserta
+            "peserta": peserta,
+            "is_incomplete": is_incomplete,
         })
 
 

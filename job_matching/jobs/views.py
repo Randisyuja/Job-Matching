@@ -42,7 +42,7 @@ class StaffJenisCreateView(View):
         if form.is_valid():
             svc.create_jenis(form)
             messages.success(request, "Berhasil ditambahkan")
-            return redirect("jenis_list")
+            return redirect("staff_jenis_list")
 
         return render(request, "staff/jenis_form.html", {"form": form})
 
@@ -61,7 +61,7 @@ class StaffJenisUpdateView(View):
         if form.is_valid():
             svc.update_jenis(form)
             messages.success(request, "Berhasil diupdate")
-            return redirect("jenis_list")
+            return redirect("staff_jenis_list")
 
         return render(request, "jobs/jenis_form.html", {"form": form})
 
@@ -77,7 +77,7 @@ class StaffJenisDeleteView(View):
         except ValidationError as e:
             messages.error(request, e.message)
 
-        return redirect("jenis_list")
+        return redirect("staff_jenis_list")
 
 
 class StaffLowonganListView(View):
@@ -136,7 +136,7 @@ class StaffLowonganDetailView(View):
                     request,
                     "Anda harus memiliki profil peserta untuk melamar."
                 )
-                return redirect("lowongan_detail", pk=pk)
+                return redirect("staff_lowongan_detail", pk=pk)
 
             peserta = request.user.peserta_profile
 
@@ -166,17 +166,17 @@ class StaffLowonganDetailView(View):
                 "Lamaran berhasil dikirim! Anda dapat memantau status "
                 "lamaran di halaman lamaran Anda."
             )
-            return redirect("lamaran_list")
+            return redirect("staff_lamaran_list")
 
         except (ValueError, DjangoValidationError) as e:
             messages.error(request, str(e))
-            return redirect("lowongan_detail", pk=pk)
+            return redirect("staff_lowongan_detail", pk=pk)
         except Exception as e:
             messages.error(
                 request,
                 f"Terjadi kesalahan: {str(e)}"
             )
-            return redirect("lowongan_detail", pk=pk)
+            return redirect("staff_lowongan_detail", pk=pk)
 
 
 class StaffLowonganCreateView(View):
@@ -199,7 +199,7 @@ class StaffLowonganCreateView(View):
         if form.is_valid() and formset.is_valid():
             svc.create_lowongan(form, formset, request.user)
             messages.success(request, "Lowongan berhasil dibuat")
-            return redirect("lowongan_list")
+            return redirect("staff_lowongan_list")
 
         context = {
             "form": form,
@@ -223,7 +223,7 @@ class StaffLowonganUpdateView(View):
         if form.is_valid():
             svc.update_lowongan(form, request.user)
             messages.success(request, "Lowongan berhasil diupdate")
-            return redirect("lowongan_list")
+            return redirect("staff_lowongan_list")
 
         return render(request, "staff/lowongan_form.html", {"form": form})
 
@@ -234,7 +234,7 @@ class StaffLowonganDeleteView(View):
         obj = get_object_or_404(Lowongan, pk=pk)
         svc.delete_lowongan(obj)
         messages.success(request, "Lowongan berhasil dihapus")
-        return redirect("lowongan_list")
+        return redirect("staff_lowongan_list")
 
 
 class JenisListView(View):
