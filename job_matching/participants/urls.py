@@ -6,7 +6,7 @@ urlpatterns = [
     path(
         "validasi-1/",
         views.StaffPesertaStatusListView.as_view(
-            status_value=views.StatusValidasi.VALIDATED_1,
+            status_value=views.StatusValidasi.DIAJUKAN,
             template_name="staff/validasi_1.html",
             page_title="Peserta Validasi 1",
         ),
@@ -15,7 +15,7 @@ urlpatterns = [
     path(
         "validasi-2/",
         views.StaffPesertaStatusListView.as_view(
-            status_value=views.StatusValidasi.VALIDATED_2,
+            status_value=views.StatusValidasi.VALIDATED_1,
             template_name="staff/validasi_2.html",
             page_title="Peserta Validasi 2",
         ),

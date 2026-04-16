@@ -10,6 +10,15 @@ from .choices import StatusLamaran
 from . import services
 
 
+def _is_peserta_without_profile(user):
+    return (
+        user.is_authenticated
+        and not user.is_staff
+        and not user.is_superuser
+        and not hasattr(user, "peserta_profile")
+    )
+
+
 class StaffLamaranListView(LoginRequiredMixin, View):
 
     def get(self, request):
@@ -39,6 +48,13 @@ class StaffLamaranListView(LoginRequiredMixin, View):
 class StaffLamaranCreateView(LoginRequiredMixin, View):
 
     def get(self, request):
+        if _is_peserta_without_profile(request.user):
+            messages.warning(
+                request,
+                "Lengkapi profil peserta terlebih dahulu sebelum melamar.",
+            )
+            return redirect("peserta_create")
+
         form = LamaranCreateForm()
 
         # Pre-fill lowongan field if provided in query string
@@ -49,6 +65,13 @@ class StaffLamaranCreateView(LoginRequiredMixin, View):
         return render(request, "applications/form.html", {"form": form})
 
     def post(self, request):
+        if _is_peserta_without_profile(request.user):
+            messages.warning(
+                request,
+                "Lengkapi profil peserta terlebih dahulu sebelum melamar.",
+            )
+            return redirect("peserta_create")
+
         form = LamaranCreateForm(request.POST)
 
         if form.is_valid():
@@ -66,7 +89,7 @@ class StaffLamaranDetailView(LoginRequiredMixin, View):
 
     def get(self, request, pk):
         lamaran = get_object_or_404(Lamaran, pk=pk)
-        return render(request, "peserta/detail.html", {
+        return render(request, "staff/detail.html", {
             "lamaran": lamaran
         })
 
@@ -76,8 +99,9 @@ class StaffLamaranUpdateStatusView(LoginRequiredMixin, View):
     def get(self, request, pk):
         lamaran = get_object_or_404(Lamaran, pk=pk)
         form = LamaranUpdateStatusForm(instance=lamaran)
-        return render(request, "applications/status_form.html", {
-            "form": form
+        return render(request, "staff/status_form.html", {
+            "form": form,
+            "lamaran": lamaran,
         })
 
     def post(self, request, pk):
@@ -89,8 +113,9 @@ class StaffLamaranUpdateStatusView(LoginRequiredMixin, View):
             messages.success(request, "Status berhasil diupdate")
             return redirect("lamaran_detail", pk=pk)
 
-        return render(request, "applications/status_form.html", {
-            "form": form
+        return render(request, "staff/status_form.html", {
+            "form": form,
+            "lamaran": lamaran,
         })
 
 
@@ -106,6 +131,14 @@ class StaffLamaranDeleteView(LoginRequiredMixin, View):
 class LamaranListView(LoginRequiredMixin, View):
 
     def get(self, request):
+        if _is_peserta_without_profile(request.user):
+            messages.warning(
+                request,
+                "Lengkapi profil peserta terlebih dahulu untuk "
+                "melihat lamaran.",
+            )
+            return redirect("peserta_create")
+
         queryset = Lamaran.objects.select_related(
             "peserta",
             "lowongan"
@@ -125,7 +158,6 @@ class LamaranListView(LoginRequiredMixin, View):
         page = request.GET.get("page")
         data = paginator.get_page(page)
 
-        # Gunakan template berbeda untuk peserta vs staff
         template = "peserta/lamaran_peserta.html"
 
         return render(request, template, {
@@ -133,3 +165,37 @@ class LamaranListView(LoginRequiredMixin, View):
             "status_choices": StatusLamaran.choices,
             "selected_status": status,
         })
+
+
+class LamaranPesertaDetailView(LoginRequiredMixin, View):
+
+    def get(self, request, pk):
+        if _is_peserta_without_profile(request.user):
+            messages.warning(
+                request,
+                "Lengkapi profil peserta terlebih dahulu untuk "
+                "melihat detail lamaran.",
+            )
+            return redirect("peserta_create")
+
+        lamaran = get_object_or_404(Lamaran, pk=pk)
+
+        if lamaran.peserta != request.user.peserta_profile:
+            messages.error(
+                request,
+                "Anda tidak memiliki akses ke lamaran ini."
+            )
+            return redirect("lamaran_peserta")
+
+        return render(request, "peserta/lamaran_detail.html", {
+            "lamaran": lamaran,
+        })
+
+
+class LamaranDeleteView(LoginRequiredMixin, View):
+
+    def post(self, request, pk):
+        lamaran = get_object_or_404(Lamaran, pk=pk)
+        services.delete_lamaran(lamaran)
+        messages.success(request, "Lamaran berhasil dihapus")
+        return redirect("lamaran_peserta")

@@ -51,6 +51,26 @@ class StaffPesertaStatusListView(LoginRequiredMixin, View):
 
 class PesertaCreateView(LoginRequiredMixin, View):
 
+    def _merge_peserta_session_data(self, request):
+        existing_data = request.session.get("peserta_form", {}).copy()
+
+        for key, value in request.POST.items():
+            if key in ["csrfmiddlewaretoken", "step", "navigation"]:
+                continue
+            existing_data[key] = value
+
+        request.session["peserta_form"] = existing_data
+
+    def _save_current_step_for_previous(self, request, step):
+        if step in ["1", "2", "3", "4", "5", "6"]:
+            self._merge_peserta_session_data(request)
+        elif step == "7":
+            request.session["pendidikan_form"] = request.POST
+        elif step == "8":
+            request.session["pekerjaan_form"] = request.POST
+            request.session["keluarga_form"] = request.POST
+            request.session["dokumen_form"] = request.POST
+
     def _peserta_form(self, request):
         data = request.session.get("peserta_form")
         if data:
@@ -76,10 +96,19 @@ class PesertaCreateView(LoginRequiredMixin, View):
         return forms.DataKeluargaFormSet()
 
     def _dokumen_formset(self, request):
+        data = request.session.get("dokumen_form")
+        if data:
+            return forms.DokumenPesertaFormSet(data)
         return forms.DokumenPesertaFormSet()
 
     def _clear_session(self, request):
-        keys = ["peserta_form", "pendidikan_form", "pekerjaan_form", "keluarga_form"]
+        keys = [
+            "peserta_form",
+            "pendidikan_form",
+            "pekerjaan_form",
+            "keluarga_form",
+            "dokumen_form",
+        ]
         for key in keys:
             request.session.pop(key, None)
 
@@ -97,30 +126,54 @@ class PesertaCreateView(LoginRequiredMixin, View):
 
     def post(self, request):
         step = request.POST.get("step", "1")
+        navigation = request.POST.get("navigation", "next")
+
+        if navigation == "previous":
+            self._save_current_step_for_previous(request, step)
+            previous_step = max(int(step) - 1, 1)
+            return redirect(f"{request.path}?step={previous_step}")
 
         if step in ["1", "2", "3", "4", "5", "6"]:
             form = forms.PesertaForm(request.POST)
             if form.is_valid():
-                request.session["peserta_form"] = request.POST
+                self._merge_peserta_session_data(request)
                 return redirect(f"{request.path}?step={int(step) + 1}")
-            return render(request, "peserta/peserta_form.html", {"form": form, "current_step": step})
+            return render(
+                request,
+                "peserta/peserta_form.html",
+                {"form": form, "current_step": step},
+            )
 
         if step == "7":
             pendidikan = forms.RiwayatPendidikanFormSet(request.POST)
             if pendidikan.is_valid():
                 request.session["pendidikan_form"] = request.POST
                 return redirect(f"{request.path}?step=8")
-            return render(request, "peserta/peserta_form.html", {"pendidikan": pendidikan, "current_step": step})
+            return render(
+                request,
+                "peserta/peserta_form.html",
+                {"pendidikan": pendidikan, "current_step": step},
+            )
 
         if step == "8":
             pekerjaan = forms.RiwayatPekerjaanFormSet(request.POST)
             keluarga = forms.DataKeluargaFormSet(request.POST)
             dokumen = forms.DokumenPesertaFormSet(request.POST, request.FILES)
 
-            peserta = forms.PesertaForm(request.session.get("peserta_form", {}))
-            pendidikan = forms.RiwayatPendidikanFormSet(request.session.get("pendidikan_form", {}))
+            peserta = forms.PesertaForm(
+                request.session.get("peserta_form", {})
+            )
+            pendidikan = forms.RiwayatPendidikanFormSet(
+                request.session.get("pendidikan_form", {})
+            )
 
-            if all([peserta.is_valid(), pendidikan.is_valid(), pekerjaan.is_valid(), keluarga.is_valid(), dokumen.is_valid()]):
+            if all([
+                peserta.is_valid(),
+                pendidikan.is_valid(),
+                pekerjaan.is_valid(),
+                keluarga.is_valid(),
+                dokumen.is_valid(),
+            ]):
                 services.create_peserta(
                     request.user,
                     peserta,
@@ -130,7 +183,7 @@ class PesertaCreateView(LoginRequiredMixin, View):
                     dokumen,
                 )
                 self._clear_session(request)
-                return redirect("peserta_list")
+                return redirect("home")
 
             return render(request, "peserta/peserta_form.html", {
                 "form": peserta,
@@ -146,8 +199,8 @@ class PesertaCreateView(LoginRequiredMixin, View):
 
 class PesertaProfileView(LoginRequiredMixin, View):
 
-    def get(self, request):
-        peserta = getattr(request.user, "peserta_profile", None)
+    def get(self, request, pk):
+        peserta = get_object_or_404(Peserta, pk=pk)
         is_incomplete = peserta is None
 
         return render(request, "peserta/profil_peserta.html", {
@@ -160,6 +213,8 @@ class PesertaUpdateView(LoginRequiredMixin, View):
 
     def get(self, request, pk):
         peserta = get_object_or_404(Peserta, pk=pk)
+        next_target = request.GET.get("next", "peserta_profile")
+        is_owner_update = request.user == peserta.user
 
         form = forms.PesertaForm(instance=peserta)
         pendidikan = forms.RiwayatPendidikanFormSet(instance=peserta)
@@ -174,10 +229,15 @@ class PesertaUpdateView(LoginRequiredMixin, View):
             "keluarga": keluarga,
             "dokumen": dokumen,
             "is_update": True,
+            "is_owner_update": is_owner_update,
+            "current_step": "1",
+            "next_target": next_target,
         })
 
     def post(self, request, pk):
         peserta = get_object_or_404(Peserta, pk=pk)
+        next_target = request.POST.get("next_target", "peserta_profile")
+        is_owner_update = request.user == peserta.user
 
         form = forms.PesertaForm(request.POST, instance=peserta)
         pendidikan = forms.RiwayatPendidikanFormSet(
@@ -211,7 +271,18 @@ class PesertaUpdateView(LoginRequiredMixin, View):
                 keluarga,
                 dokumen
             )
+
+            if is_owner_update:
+                messages.warning(
+                    request,
+                    "Perubahan profil membuat status validasi "
+                    "kembali ke Menunggu Validasi dan akan "
+                    "ditinjau ulang oleh staff.",
+                )
+
             messages.success(request, "Profil berhasil diperbarui.")
+            if next_target == "peserta_detail":
+                return redirect("peserta_detail", pk=pk)
             return redirect("peserta_profile", pk=pk)
 
         return render(request, "peserta/peserta_form.html", {
@@ -221,6 +292,9 @@ class PesertaUpdateView(LoginRequiredMixin, View):
             "keluarga": keluarga,
             "dokumen": dokumen,
             "is_update": True,
+            "is_owner_update": is_owner_update,
+            "current_step": "1",
+            "next_target": next_target,
         })
 
 
@@ -238,26 +312,33 @@ class PesertaDetailView(LoginRequiredMixin, View):
     def get(self, request, pk):
         peserta = get_object_or_404(Peserta, pk=pk)
 
-        return render(request, "peserta/peserta_detail.html", {
+        return render(request, "staff/peserta_detail.html", {
             "peserta": peserta,
-            "status_choices": StatusValidasi.choices,
         })
 
     def post(self, request, pk):
         peserta = get_object_or_404(Peserta, pk=pk)
-        status = request.POST.get("status_validasi", "")
+        action = request.POST.get("action", "")
         notes = request.POST.get("notes", "")
 
         try:
             services.update_validation_status(
                 peserta=peserta,
                 validator_user=request.user,
-                status=status,
+                action=action,
                 notes=notes,
             )
+            if action == "reject":
+                success_message = "Peserta berhasil ditolak."
+            elif peserta.status_validasi == StatusValidasi.VALIDATED_1:
+                success_message = "Peserta berhasil masuk tahap Validasi 1."
+            elif peserta.status_validasi == StatusValidasi.APPROVED:
+                success_message = "Peserta berhasil disetujui."
+            else:
+                success_message = "Status validasi berhasil diperbarui."
             messages.success(
                 request,
-                "Status dan catatan validasi berhasil diperbarui.",
+                success_message,
             )
         except ValidationError as error:
             messages.error(request, str(error))

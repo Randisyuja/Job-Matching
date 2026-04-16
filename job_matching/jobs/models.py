@@ -3,6 +3,12 @@ from accounts.models import User
 from datetime import date
 
 
+ACCEPTED_APPLICATION_STATUSES = (
+    "Goukaku",
+    "Diterima",
+)
+
+
 class JenisPekerjaan(models.Model):
     nama_pekerjaan = models.CharField(
         "Nama Pekerjaan",
@@ -106,7 +112,16 @@ class Lowongan(models.Model):
         verbose_name_plural = "Lowongan"
 
     def __str__(self):
-        return f"{self.nama_perusahaan} - {self.jenis_pekerjaan.nama_pekerjaan}"
+        return (
+            f"{self.nama_perusahaan} - "
+            f"{self.jenis_pekerjaan.nama_pekerjaan}"
+        )
+
+    def save(self, *args, **kwargs):
+        # Pastikan lowongan otomatis non aktif saat sudah terlaksana.
+        if self.is_completed:
+            self.is_active = False
+        super().save(*args, **kwargs)
 
     @property
     def is_expired(self):
@@ -117,8 +132,30 @@ class Lowongan(models.Model):
     @property
     def sisa_kuota(self):
         """Calculate remaining quota"""
-        approved_count = self.lamaran.filter(status_lamaran='Diterima').count()
+        if not self.pk:
+            return max(0, self.kuota)
+
+        approved_count = self.lamaran.filter(
+            status_lamaran__in=ACCEPTED_APPLICATION_STATUSES
+        ).count()
         return max(0, self.kuota - approved_count)
+
+    @property
+    def is_completed(self):
+        return self.is_expired or self.sisa_kuota <= 0
+
+    @property
+    def status_label(self):
+        if self.is_completed:
+            return "Sudah Terlaksana"
+        if self.is_active:
+            return "Aktif"
+        return "Tutup"
+
+    def apply_completion_rules(self):
+        if self.is_completed and self.is_active:
+            type(self).objects.filter(pk=self.pk).update(is_active=False)
+            self.is_active = False
 
 
 class Persyaratan(models.Model):

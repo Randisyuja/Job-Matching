@@ -20,7 +20,7 @@ class Lamaran(models.Model):
     )
     status_lamaran = models.CharField(
         "Status Lamaran",
-        choices=StatusLamaran,
+        choices=StatusLamaran.choices,
         default=StatusLamaran.PENDING,
         max_length=50,
         blank=False
@@ -28,7 +28,7 @@ class Lamaran(models.Model):
     catatan = models.TextField(
         "Catatan"
     )
-    created_at = models.DateField(
+    created_at = models.DateTimeField(
         "Tanggal Dibuat",
         auto_now_add=True
     )
@@ -40,7 +40,7 @@ class Lamaran(models.Model):
         null=True,
         blank=True
     )
-    updated_at = models.DateField(
+    updated_at = models.DateTimeField(
         "Tanggal Diupdate",
         auto_now=True
     )
@@ -54,10 +54,22 @@ class Lamaran(models.Model):
     )
 
     def save(self, *args, **kwargs):
+        if not self.pk and not self.peserta.can_apply_jobs:
+            raise ValueError(
+                "Peserta belum approved. Profil harus disetujui sebelum "
+                "melamar."
+            )
+
+        if not self.lowongan.is_active and not self.pk:
+            raise ValueError('Lowongan sudah tidak aktif')
+
         if self.lowongan.is_expired and not self.pk:
-            raise ValueError('Tidak dapat melamar ke lowongan yang sudah ditutup')
+            raise ValueError(
+                'Tidak dapat melamar ke lowongan yang sudah ditutup'
+            )
 
         if self.lowongan.sisa_kuota <= 0 and not self.pk:
             raise ValueError('Kuota lowongan sudah penuh')
 
         super().save(*args, **kwargs)
+        self.lowongan.apply_completion_rules()

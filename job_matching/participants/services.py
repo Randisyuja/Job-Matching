@@ -46,6 +46,19 @@ def update_peserta(
 ):
     peserta = peserta_form.save(commit=False)
     peserta.updated_by = user
+
+    # If peserta updates their own profile, the profile must be re-submitted.
+    if user == peserta.user:
+        peserta.status_validasi = StatusValidasi.DIAJUKAN
+        peserta.validasi_1_pada = None
+        peserta.validasi_1_oleh = None
+        peserta.validasi_1_notes = ""
+        peserta.validasi_2_pada = None
+        peserta.validasi_2_oleh = None
+        peserta.validasi_2_notes = ""
+        peserta.tervalidasi_pada = None
+        peserta.alasan_penolakan = ""
+
     peserta.save()
 
     pendidikan_formset.save()
@@ -87,32 +100,43 @@ def final_approve(peserta):
 def update_validation_status(
     peserta: Peserta,
     validator_user,
-    status,
+    action,
     notes="",
 ):
-    valid_statuses = {choice[0] for choice in StatusValidasi.choices}
-    if status not in valid_statuses:
-        raise ValidationError("Status validasi tidak dikenali")
+    valid_actions = {"progress", "reject"}
+    if action not in valid_actions:
+        raise ValidationError("Aksi validasi tidak dikenali")
 
-    peserta.status_validasi = status
+    current_status = peserta.status_validasi
     peserta.updated_by = validator_user
 
-    if status == StatusValidasi.VALIDATED_1:
-        peserta.validasi_1_pada = timezone.now()
-        peserta.validasi_1_oleh = validator_user
-        peserta.validasi_1_notes = notes
+    if action == "progress":
+        if current_status == StatusValidasi.DIAJUKAN:
+            peserta.status_validasi = StatusValidasi.VALIDATED_1
+            peserta.validasi_1_pada = timezone.now()
+            peserta.validasi_1_oleh = validator_user
+            peserta.validasi_1_notes = notes
+        elif current_status == StatusValidasi.VALIDATED_1:
+            peserta.status_validasi = StatusValidasi.APPROVED
+            peserta.validasi_2_pada = timezone.now()
+            peserta.validasi_2_oleh = validator_user
+            peserta.validasi_2_notes = notes
+            peserta.tervalidasi_pada = timezone.now()
+        else:
+            raise ValidationError(
+                "Status peserta tidak bisa diproses lebih lanjut"
+            )
 
-    if status in [
-        StatusValidasi.VALIDATED_2,
-        StatusValidasi.APPROVED,
-        StatusValidasi.REJECTED,
-        StatusValidasi.SUSPENDED,
-    ]:
+    if action == "reject":
+        if current_status != StatusValidasi.VALIDATED_1:
+            raise ValidationError(
+                "Peserta hanya bisa ditolak saat tahap Validasi 2"
+            )
+
+        peserta.status_validasi = StatusValidasi.REJECTED
         peserta.validasi_2_pada = timezone.now()
         peserta.validasi_2_oleh = validator_user
         peserta.validasi_2_notes = notes
-
-    if status in [StatusValidasi.REJECTED, StatusValidasi.SUSPENDED]:
         peserta.alasan_penolakan = notes
 
     peserta.save()

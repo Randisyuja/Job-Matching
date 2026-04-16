@@ -4,7 +4,6 @@ from django.db import models
 class StatusValidasi(models.TextChoices):
     DIAJUKAN = "Diajukan", "Menunggu Validasi"
     VALIDATED_1 = "Validasi 1", "Validasi 1"
-    VALIDATED_2 = "Validasi 2", "Validasi 2"
     APPROVED = "Approved", "Approved"
     REJECTED = "Rejected", "Rejected"
     SUSPENDED = "Suspended", "Suspended"
@@ -44,14 +43,14 @@ class TanganDominan(models.TextChoices):
 
 
 class Jenjang(models.TextChoices):
-    SD = "Sekolah Dasar", "SD"
-    SMP = "Sekolah Menengah Pertama", "SMP"
-    SMA = "Sekolah Menengah Atas", "SMA"
-    SMK = "Sekolah Menengah Kejuruan", "SMK"
-    D3 = "Diploma 3", "D3"
-    S1 = "Sarjana", "S1"
-    S2 = "Magister", "S2"
-    S3 = "Doktor", "S3"
+    SD = "sd", "Sekolah Dasar"
+    SMP = "smp", "Sekolah Menengah Pertama"
+    SMA = "sma", "Sekolah Menengah Atas"
+    SMK = "smk", "Sekolah Menengah Kejuruan"
+    D3 = "d3", "Diploma 3"
+    S1 = "s1", "Sarjana"
+    S2 = "s2", "Magister"
+    S3 = "s3", "Doktor"
 
 
 class HubunganKeluarga(models.TextChoices):

@@ -22,14 +22,14 @@ class Peserta(models.Model):
     jenis_kelamin = models.CharField(
         "Jenis Kelamin",
         max_length=50,
-        choices=JenisKelamin,
+        choices=JenisKelamin.choices,
         blank=True
     )
 
     agama = models.CharField(
         "Agama",
         max_length=50,
-        choices=Agama,
+        choices=Agama.choices,
         blank=True
     )
 
@@ -38,7 +38,7 @@ class Peserta(models.Model):
     status_pernikahan = models.CharField(
         "Status Pernikahan",
         max_length=50,
-        choices=StatusPernikahan,
+        choices=StatusPernikahan.choices,
         blank=True
     )
 
@@ -65,14 +65,14 @@ class Peserta(models.Model):
     golongan_darah = models.CharField(
         "Golongan Darah",
         max_length=50,
-        choices=GolonganDarah,
+        choices=GolonganDarah.choices,
         blank=True
     )
 
     tangan_dominan = models.CharField(
         "Tangan Dominan",
         max_length=50,
-        choices=TanganDominan,
+        choices=TanganDominan.choices,
         blank=True
     )
 
@@ -88,7 +88,7 @@ class Peserta(models.Model):
     # STATUS & VALIDASI
     status_validasi = models.CharField(
         "Status Validasi",
-        choices=StatusValidasi,
+        choices=StatusValidasi.choices,
         default=StatusValidasi.DIAJUKAN,
         db_index=True
     )
@@ -161,7 +161,7 @@ class Peserta(models.Model):
 
     def validate_level_1(self, validator_user, notes=''):
         """Admin validates - Level 1"""
-        if self.status_validasi != 'submitted':
+        if self.status_validasi != StatusValidasi.DIAJUKAN:
             raise ValidationError('Can only validate submitted profiles')
 
         from django.utils import timezone
@@ -173,11 +173,11 @@ class Peserta(models.Model):
 
     def validate_level_2(self, validator_user, notes=''):
         """Koordinator validates - Level 2"""
-        if self.status_validasi != 'validated_1':
+        if self.status_validasi != StatusValidasi.VALIDATED_1:
             raise ValidationError('Can only validate level-1 approved profiles')
 
         from django.utils import timezone
-        self.status_validasi = StatusValidasi.VALIDATED_2
+        self.status_validasi = StatusValidasi.APPROVED
         self.validasi_2_pada = timezone.now()
         self.validasi_2_oleh = validator_user
         self.validasi_2_notes = notes
@@ -185,30 +185,30 @@ class Peserta(models.Model):
 
     def reject(self, validator_user, reason):
         """Koordinator rejects - Level 2"""
-        if self.status_validasi != 'validated_1':
+        if self.status_validasi != StatusValidasi.VALIDATED_1:
             raise ValidationError('Can only reject level-1 approved profiles')
 
         from django.utils import timezone
         self.status_validasi = StatusValidasi.REJECTED
-        self.validated_2_at = timezone.now()
-        self.validated_2_by = validator_user
-        self.rejection_reason = reason
+        self.validasi_2_pada = timezone.now()
+        self.validasi_2_oleh = validator_user
+        self.alasan_penolakan = reason
         self.save()
 
     def final_approve(self):
         """Final approval - ready to apply for jobs"""
-        if self.status_validasi != 'validated_2':
+        if self.status_validasi != StatusValidasi.VALIDATED_1:
             raise ValidationError('Must pass both validations first')
 
         from django.utils import timezone
         self.status_validasi = StatusValidasi.APPROVED
-        self.approved_at = timezone.now()
+        self.tervalidasi_pada = timezone.now()
         self.save()
 
     def suspend(self, reason):
         """Suspend peserta"""
         self.status_validasi = StatusValidasi.SUSPENDED
-        self.rejection_reason = reason
+        self.alasan_penolakan = reason
         self.save()
 
     @property
@@ -220,14 +220,11 @@ class Peserta(models.Model):
     def validation_progress(self):
         """Get validation progress percentage"""
         status_weight = {
-            'draft': 0,
-            'submitted': 20,
-            'validated_1': 50,
-            'validated_2': 80,
-            'approved': 100,
-            'rejected_1': 0,
-            'rejected_2': 0,
-            'suspended': 0,
+            StatusValidasi.DIAJUKAN: 0,
+            StatusValidasi.VALIDATED_1: 50,
+            StatusValidasi.APPROVED: 100,
+            StatusValidasi.REJECTED: 0,
+            StatusValidasi.SUSPENDED: 0,
         }
         return status_weight.get(self.status_validasi, 0)
 
@@ -241,7 +238,7 @@ class RiwayatPendidikan(models.Model):
     jenjang = models.CharField(
         "Jenjang",
         max_length=50,
-        choices=Jenjang,
+        choices=Jenjang.choices,
         blank=False
     )
     nama_institusi = models.CharField(
@@ -302,7 +299,7 @@ class DataKeluarga(models.Model):
     hubungan_keluarga = models.CharField(
         "Hubungan Keluarga",
         max_length=50,
-        choices=HubunganKeluarga,
+        choices=HubunganKeluarga.choices,
         blank=False
     )
     tanggal_lahir = models.DateField("Tanggal Lahir", blank=False)
@@ -334,7 +331,7 @@ class DokumenPeserta(models.Model):
     jenis_dokumen = models.CharField(
         "Jenis Dokumen",
         max_length=50,
-        choices=DokumenPesertaChoices,
+        choices=DokumenPesertaChoices.choices,
         blank=False
     )
     nama_dokumen = models.CharField("Nama Dokumen", max_length=50, blank=False)

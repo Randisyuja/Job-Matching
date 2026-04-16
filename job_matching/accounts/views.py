@@ -3,6 +3,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib.auth import get_user_model, login
+from jobs.models import Lowongan
 
 from .models import Staff
 from .forms import RegisterForm, LoginForm, UserUpdateForm, StaffForm
@@ -11,13 +12,68 @@ from . import services
 User = get_user_model()
 
 
+def _is_peserta_without_profile(user):
+    return (
+        user.is_authenticated
+        and not user.is_staff
+        and not user.is_superuser
+        and not hasattr(user, "peserta_profile")
+    )
+
+
 def homepage_peserta(request):
-    if request.user.is_authenticated and not hasattr(request.user, 'peserta_profile'):
+    if _is_peserta_without_profile(request.user):
         return redirect('peserta_create')
-    return render(request, template_name='peserta/homepage.html')
+
+    latest_jobs = Lowongan.objects.select_related(
+        "jenis_pekerjaan"
+    ).filter(is_active=True).order_by("-created_at")[:6]
+
+    articles = [
+        {
+            "title": "Cara menyiapkan profil yang lebih dilirik recruiter",
+            "excerpt": (
+                "Fokus pada ringkasan pengalaman, kelengkapan dokumen, dan "
+                "konsistensi data agar proses seleksi lebih cepat."
+            ),
+            "category": "Tips Karier",
+            "date": "09 Apr 2026",
+            "read_time": "4 menit baca",
+            "link": "/news",
+        },
+        {
+            "title": "3 hal yang perlu dicek sebelum melamar lowongan terbaru",
+            "excerpt": (
+                "Pastikan batas usia, kuota aktif, dan tanggal penutupan "
+                "masih sesuai sebelum mengirim lamaran."
+            ),
+            "category": "Persiapan",
+            "date": "08 Apr 2026",
+            "read_time": "3 menit baca",
+            "link": "/news",
+        },
+        {
+            "title": "Mengapa validasi profil penting untuk proses lamaran",
+            "excerpt": (
+                "Profil yang sudah tervalidasi membantu peserta melanjutkan "
+                "ke tahapan lamaran tanpa hambatan tambahan."
+            ),
+            "category": "Panduan",
+            "date": "07 Apr 2026",
+            "read_time": "5 menit baca",
+            "link": "/news",
+        },
+    ]
+
+    return render(request, 'peserta/homepage.html', {
+        "latest_jobs": latest_jobs,
+        "articles": articles,
+    })
+
 
 def homepage_staff(request):
     return render(request, template_name='staff/homepage.html')
+
 
 class StaffRequiredMixin(UserPassesTestMixin):
     def test_func(self):
@@ -40,9 +96,9 @@ class RegisterView(View):
 
         if form.is_valid():
             user = services.register_user(request, form)
-            role = form.cleaned_data.get('role')
             messages.success(request, "Register berhasil")
-            return redirect("login")
+            login(request, user)
+            return redirect("peserta_create")
 
         return render(request, "register.html", {"form": form})
 
@@ -50,36 +106,27 @@ class RegisterView(View):
 class PesertaRegisterView(View):
 
     def get(self, request):
-        form = RegisterForm(initial={'role': 'peserta'})
-        return render(request, "register.html", {"form": form, "is_peserta": True})
+        return redirect("register")
 
     def post(self, request):
-        form = RegisterForm(request.POST)
-
-        if form.is_valid():
-            user = services.register_user(request, form)
-            messages.success(request, "Register berhasil sebagai Peserta")
-            login(request, user)
-            return redirect('peserta_create')
-
-        return render(request, "register.html", {"form": form})
+        return redirect("register")
 
 
 class StaffRegisterView(View):
 
     def get(self, request):
-        form = RegisterForm(initial={'role': 'staff'})
-        return render(request, "register.html", {"form": form, "is_staff": True})
+        messages.warning(
+            request,
+            "Registrasi staff tidak tersedia di halaman ini.",
+        )
+        return redirect("register")
 
     def post(self, request):
-        form = RegisterForm(request.POST)
-
-        if form.is_valid():
-            services.register_user(request, form)
-            messages.success(request, "Register berhasil sebagai Staff")
-            return redirect("login")
-
-        return render(request, "register.html", {"form": form, "is_staff": True})
+        messages.warning(
+            request,
+            "Registrasi staff tidak tersedia di halaman ini.",
+        )
+        return redirect("register")
 
 
 class LoginView(View):
@@ -93,7 +140,24 @@ class LoginView(View):
 
         if form.is_valid():
             user = form.cleaned_data["user"]
+
+            if user.is_staff or user.is_superuser:
+                form.add_error(
+                    None,
+                    "Halaman login ini khusus peserta.",
+                )
+                return render(request, "login.html", {"form": form})
+
             services.login_user(request, user)
+
+            if _is_peserta_without_profile(user):
+                messages.warning(
+                    request,
+                    "Lengkapi profil peserta terlebih dahulu "
+                    "sebelum melanjutkan.",
+                )
+                return redirect("peserta_create")
+
             return redirect("home")
 
         return render(request, "login.html", {"form": form})

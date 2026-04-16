@@ -140,6 +140,14 @@ class StaffLowonganDetailView(View):
 
             peserta = request.user.peserta_profile
 
+            if not peserta.can_apply_jobs:
+                messages.error(
+                    request,
+                    "Profil Anda belum approved. Silakan tunggu validasi "
+                    "sebelum melamar."
+                )
+                return redirect("staff_lowongan_detail", pk=pk)
+
             # Check if already applied
             if Lamaran.objects.filter(
                 peserta=peserta,
@@ -274,7 +282,7 @@ class LowonganListView(View):
         return render(request, "peserta/lowongan_list.html", context)
 
 
-class LowonganDetailView(View):
+class LowonganDetailView(LoginRequiredMixin, View):
     def get(self, request, pk):
         lowongan, persyaratan = svc.get_lowongan_detail(pk)
 
@@ -305,6 +313,14 @@ class LowonganDetailView(View):
 
             peserta = request.user.peserta_profile
 
+            if not peserta.can_apply_jobs:
+                messages.error(
+                    request,
+                    "Profil Anda belum approved. Silakan tunggu validasi "
+                    "sebelum melamar."
+                )
+                return redirect("lowongan_detail", pk=pk)
+
             # Check if already applied
             if Lamaran.objects.filter(
                 peserta=peserta,
@@ -331,7 +347,7 @@ class LowonganDetailView(View):
                 "Lamaran berhasil dikirim! Anda dapat memantau status "
                 "lamaran di halaman lamaran Anda."
             )
-            return redirect("lamaran_list")
+            return redirect("lamaran_peserta")
 
         except (ValueError, DjangoValidationError) as e:
             messages.error(request, str(e))

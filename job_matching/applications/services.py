@@ -5,14 +5,16 @@ from participants.models import Peserta
 
 @transaction.atomic
 def create_lamaran(user, form):
-    # try:
-    #     peserta = user.peserta_profile
-    # except Peserta.DoesNotExist:
-    #     raise ValidationError("User bukan peserta")
+    try:
+        peserta = user.peserta_profile
+    except Peserta.DoesNotExist as exc:
+        raise ValidationError("User bukan peserta") from exc
 
-    # if not peserta.can_apply_jobs:
-    #     raise ValidationError("Peserta belum lolos validasi")
-    peserta = user.peserta_profile
+    if not peserta.can_apply_jobs:
+        raise ValidationError(
+            "Peserta belum approved. Profil harus disetujui sebelum melamar."
+        )
+
     lamaran = form.save(commit=False)
     lamaran.peserta = peserta
     lamaran.created_by = user
@@ -26,6 +28,7 @@ def update_status(user, lamaran, form):
     lamaran = form.save(commit=False)
     lamaran.updated_by = user
     lamaran.save()
+    lamaran.lowongan.apply_completion_rules()
     return lamaran
 
 
