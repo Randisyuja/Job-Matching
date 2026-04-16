@@ -1,60 +1,166 @@
 {% extends "staff/staff_base.html" %}
 {% block content %}
 
-<h2>Form Lowongan</h2>
+<section class="max-w-4xl mx-auto py-8">
+    <div class="mb-6">
+        <h1 class="text-2xl font-semibold text-gray-900">Tambah Lowongan</h1>
+        <p class="mt-1 text-sm text-gray-500">Lengkapi informasi lowongan dan persyaratan pelamar.</p>
+    </div>
 
-<form method="post">
-    {% csrf_token %}
+    <div class="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm sm:p-8">
+        {% if form.non_field_errors %}
+            <div class="mb-5 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+                {% for error in form.non_field_errors %}
+                    <p>{{ error }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
 
-    <h4>Data Lowongan</h4>
-    {{ form.as_p }}
+        <form method="post" class="space-y-8">
+            {% csrf_token %}
 
-    <hr>
+            <div>
+                <h2 class="mb-4 text-lg font-semibold text-gray-900">Data Lowongan</h2>
+                <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                    {% for field in form %}
+                        <div class="{% if field.name == 'deskripsi_pekerjaan' or field.name == 'is_active' %}md:col-span-2{% endif %}">
+                            {% if field.name == 'is_active' %}
+                                <label class="inline-flex items-center gap-3 rounded-lg border border-gray-200 px-3 py-2.5">
+                                    <input
+                                        type="checkbox"
+                                        name="{{ field.html_name }}"
+                                        id="{{ field.id_for_label }}"
+                                        class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                                        {% if field.value %}checked{% endif %}
+                                    >
+                                    <span class="text-sm font-medium text-gray-700">{{ field.label }}</span>
+                                </label>
+                            {% else %}
+                                <label for="{{ field.id_for_label }}" class="mb-1.5 block text-sm font-medium text-gray-700">
+                                    {{ field.label }}
+                                    {% if field.field.required %}<span class="text-red-500">*</span>{% endif %}
+                                </label>
 
-    <!-- Persyaratan -->
-    <div class="card mb-4">
-        <div class="card-header d-flex justify-content-between">
-            <span>Persyaratan</span>
-            <button type="button"
-                    class="btn btn-sm btn-primary add-form"
-                    data-prefix="{{ formset.prefix }}">
-                + Tambah
-            </button>
-        </div>
+                                {% if field.name == 'jenis_pekerjaan' %}
+                                    <select
+                                        name="{{ field.html_name }}"
+                                        id="{{ field.id_for_label }}"
+                                        {% if field.field.required %}required{% endif %}
+                                        class="w-full rounded-lg border {% if field.errors %}border-red-300 focus:border-red-500 focus:ring-red-500{% else %}border-gray-300 focus:border-indigo-500 focus:ring-indigo-500{% endif %} px-3 py-2.5 text-sm text-gray-800 focus:outline-none focus:ring-2"
+                                    >
+                                        {% for value, label in field.field.choices %}
+                                            <option value="{{ value }}" {% if field.value|stringformat:'s' == value|stringformat:'s' %}selected{% endif %}>{{ label }}</option>
+                                        {% endfor %}
+                                    </select>
+                                {% elif field.name == 'deskripsi_pekerjaan' %}
+                                    <textarea
+                                        name="{{ field.html_name }}"
+                                        id="{{ field.id_for_label }}"
+                                        rows="4"
+                                        {% if field.field.required %}required{% endif %}
+                                        class="w-full rounded-lg border {% if field.errors %}border-red-300 focus:border-red-500 focus:ring-red-500{% else %}border-gray-300 focus:border-indigo-500 focus:ring-indigo-500{% endif %} px-3 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-2"
+                                    >{% if field.value != None %}{{ field.value }}{% endif %}</textarea>
+                                {% else %}
+                                    <input
+                                        type="{% if field.field.widget.input_type %}{{ field.field.widget.input_type }}{% else %}text{% endif %}"
+                                        name="{{ field.html_name }}"
+                                        id="{{ field.id_for_label }}"
+                                        value="{% if field.value != None %}{{ field.value }}{% endif %}"
+                                        {% if field.field.required %}required{% endif %}
+                                        class="w-full rounded-lg border {% if field.errors %}border-red-300 focus:border-red-500 focus:ring-red-500{% else %}border-gray-300 focus:border-indigo-500 focus:ring-indigo-500{% endif %} px-3 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-2"
+                                    >
+                                {% endif %}
+                            {% endif %}
 
-        <div class="card-body">
+                            {% if field.errors %}
+                                <p class="mt-1.5 text-sm text-red-600">{{ field.errors|striptags }}</p>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
 
-            {{ formset.management_form }}
+            <div>
+                <div class="mb-4 flex items-center justify-between">
+                    <h2 class="text-lg font-semibold text-gray-900">Persyaratan</h2>
+                    <button
+                        type="button"
+                        class="add-form inline-flex items-center rounded-lg bg-indigo-600 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-700 transition-colors"
+                        data-prefix="{{ formset.prefix }}"
+                    >
+                        + Tambah
+                    </button>
+                </div>
 
-            <div class="formset-container"
-                id="formset-{{ formset.prefix }}"
-                data-prefix="{{ formset.prefix }}">
+                {{ formset.management_form }}
 
-                {% for form in formset %}
-                    <div class="formset-item border p-3 mb-2">
-                        {{ form.as_p }}
-                        <button type="button" class="btn btn-danger btn-sm remove-form">
+                <div class="formset-container space-y-3" id="formset-{{ formset.prefix }}" data-prefix="{{ formset.prefix }}">
+                    {% for req_form in formset %}
+                        <div class="formset-item rounded-lg border border-gray-200 bg-gray-50 p-4">
+                            {% for hidden in req_form.hidden_fields %}
+                                {{ hidden }}
+                            {% endfor %}
+
+                            {% for field in req_form.visible_fields %}
+                                <label for="{{ field.id_for_label }}" class="mb-1.5 block text-sm font-medium text-gray-700">
+                                    {{ field.label }}
+                                </label>
+                                <input
+                                    type="text"
+                                    name="{{ field.html_name }}"
+                                    id="{{ field.id_for_label }}"
+                                    value="{% if field.value != None %}{{ field.value }}{% endif %}"
+                                    {% if field.field.required %}required{% endif %}
+                                    class="w-full rounded-lg border {% if field.errors %}border-red-300 focus:border-red-500 focus:ring-red-500{% else %}border-gray-300 focus:border-indigo-500 focus:ring-indigo-500{% endif %} px-3 py-2.5 text-sm text-gray-800 focus:outline-none focus:ring-2"
+                                >
+                                {% if field.errors %}
+                                    <p class="mt-1.5 text-sm text-red-600">{{ field.errors|striptags }}</p>
+                                {% endif %}
+                            {% endfor %}
+
+                            <button type="button" class="remove-form mt-3 inline-flex items-center rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs font-semibold text-red-700 hover:bg-red-100 transition-colors">
+                                Hapus
+                            </button>
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <template id="empty-form-{{ formset.prefix }}">
+                    <div class="formset-item rounded-lg border border-gray-200 bg-gray-50 p-4">
+                        {% for hidden in formset.empty_form.hidden_fields %}
+                            {{ hidden }}
+                        {% endfor %}
+
+                        {% for field in formset.empty_form.visible_fields %}
+                            <label for="{{ field.id_for_label }}" class="mb-1.5 block text-sm font-medium text-gray-700">
+                                {{ field.label }}
+                            </label>
+                            <input
+                                type="text"
+                                name="{{ field.html_name }}"
+                                id="{{ field.id_for_label }}"
+                                {% if field.field.required %}required{% endif %}
+                                class="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-800 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                            >
+                        {% endfor %}
+
+                        <button type="button" class="remove-form mt-3 inline-flex items-center rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs font-semibold text-red-700 hover:bg-red-100 transition-colors">
                             Hapus
                         </button>
                     </div>
-                {% endfor %}
-
+                </template>
             </div>
 
-            <!-- Empty template -->
-            <template id="empty-form-{{ formset.prefix }}">
-                <div class="formset-item border p-3 mb-2">
-                    {{ formset.empty_form.as_p|safe }}
-                    <button type="button" class="btn btn-danger btn-sm remove-form">
-                        Hapus
-                    </button>
-                </div>
-            </template>
-        </div>
+            <div class="flex items-center gap-3">
+                <button type="submit" class="inline-flex items-center justify-center rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700 transition-colors">
+                    Simpan
+                </button>
+                <a href="{% url 'staff_lowongan_list' %}" class="inline-flex items-center justify-center rounded-lg border border-gray-300 px-5 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors">
+                    Batal
+                </a>
+            </div>
+        </form>
     </div>
-
-    <button class="btn btn-success">Simpan</button>
-
-</form>
+</section>
 
 {% endblock %}

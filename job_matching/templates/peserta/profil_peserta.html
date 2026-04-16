@@ -47,7 +47,7 @@
 				Buat Profil
 			</a>
 			{% endif %}
-			<a href="{% url 'peserta_list' %}"
+			<a href="{% url 'home' %}"
 			   class="inline-flex items-center px-4 py-2 rounded-lg border border-gray-300 text-sm font-medium text-gray-700 hover:bg-gray-50">
 				Kembali ke Daftar
 			</a>
@@ -115,19 +115,6 @@
 				<div class="bg-indigo-600 h-2.5 rounded-full" style="width: {{ peserta.validation_progress }}%;"></div>
 			</div>
 			<p class="text-sm font-medium text-gray-700">{{ peserta.validation_progress }}%</p>
-
-			{% if peserta.validasi_1_notes %}
-				<div class="mt-4">
-					<p class="text-sm text-gray-500">Catatan Validasi 1</p>
-					<p class="text-sm text-gray-800">{{ peserta.validasi_1_notes }}</p>
-				</div>
-			{% endif %}
-			{% if peserta.validasi_2_notes %}
-				<div class="mt-4">
-					<p class="text-sm text-gray-500">Catatan Validasi 2</p>
-					<p class="text-sm text-gray-800">{{ peserta.validasi_2_notes }}</p>
-				</div>
-			{% endif %}
 		</div>
 	</div>
 

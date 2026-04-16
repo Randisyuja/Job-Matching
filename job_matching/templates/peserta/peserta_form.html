@@ -1,194 +1,469 @@
 {% extends "peserta/peserta_base.html" %}
 {% block content %}
 
-<h3>{% if is_update %}Edit Profil Peserta{% else %}Form Peserta Baru{% endif %}</h3>
+<section class="max-w-6xl mx-auto px-6 py-8">
+    <div class="mb-6">
+        <div class="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+            <div>
+                <h1 class="text-2xl font-semibold text-gray-900">
+                    {% if is_update %}Edit Profil Peserta{% else %}Form Peserta Baru{% endif %}
+                </h1>
+                <p class="mt-1 text-sm text-gray-500">
+                    Lengkapi data peserta secara bertahap sampai tahap dokumen.
+                </p>
+            </div>
+            {% if not is_update %}
+            <div class="rounded-full border border-indigo-200 bg-indigo-50 px-4 py-2 text-sm font-semibold text-indigo-700">
+                Langkah {{ current_step }} dari 8
+            </div>
+            {% endif %}
+        </div>
+    </div>
 
-<!-- Step Indicator -->
-<div class="mb-4">
-    <ul class="nav nav-pills nav-justified">
-        <li class="nav-item"><a class="nav-link {% if current_step == '1' %}active{% endif %}" href="?step=1">1. Data Pribadi</a></li>
-        <li class="nav-item"><a class="nav-link {% if current_step == '2' %}active{% endif %}" href="?step=2">2. Alamat</a></li>
-        <li class="nav-item"><a class="nav-link {% if current_step == '3' %}active{% endif %}" href="?step=3">3. Program</a></li>
-        <li class="nav-item"><a class="nav-link {% if current_step == '4' %}active{% endif %}" href="?step=4">4. Ekonomi</a></li>
-        <li class="nav-item"><a class="nav-link {% if current_step == '5' %}active{% endif %}" href="?step=5">5. Fisik</a></li>
-        <li class="nav-item"><a class="nav-link {% if current_step == '6' %}active{% endif %}" href="?step=6">6. Personal</a></li>
-        <li class="nav-item"><a class="nav-link {% if current_step == '7' %}active{% endif %}" href="?step=7">7. Pendidikan</a></li>
-        <li class="nav-item"><a class="nav-link {% if current_step == '8' %}active{% endif %}" href="?step=8">8. Pekerjaan/Keluarga/Dokumen</a></li>
-    </ul>
-</div>
+    {% if is_update and is_owner_update %}
+    <div class="mb-6 rounded-2xl border border-yellow-200 bg-yellow-50 px-4 py-3 text-sm text-yellow-800">
+        Jika Anda mengubah data profil, status validasi akan kembali ke Menunggu Validasi dan perlu ditinjau ulang oleh staff.
+    </div>
+    {% endif %}
 
-<form method="post" enctype="multipart/form-data">
-    {% csrf_token %}
-    <input type="hidden" name="step" value="{{ current_step }}">
-
-    {% if current_step == '1' %}
-    <div class="card mb-4">
-        <div class="card-header bg-primary text-white">Data Pribadi</div>
-        <div class="card-body">
-            <div class="mb-3">{{ form.nama_lengkap.label_tag }} {{ form.nama_lengkap }} {{ form.nama_lengkap.errors }}</div>
-            <div class="mb-3">{{ form.nama_lengkap_katakana.label_tag }} {{ form.nama_lengkap_katakana }} {{ form.nama_lengkap_katakana.errors }}</div>
-            <div class="mb-3">{{ form.tanggal_lahir.label_tag }} {{ form.tanggal_lahir }} {{ form.tanggal_lahir.errors }}</div>
-            <div class="mb-3">{{ form.jenis_kelamin.label_tag }} {{ form.jenis_kelamin }} {{ form.jenis_kelamin.errors }}</div>
-            <div class="mb-3">{{ form.agama.label_tag }} {{ form.agama }} {{ form.agama.errors }}</div>
-            <div class="mb-3">{{ form.nomor_hp.label_tag }} {{ form.nomor_hp }} {{ form.nomor_hp.errors }}</div>
-            <div class="mb-3">{{ form.status_pernikahan.label_tag }} {{ form.status_pernikahan }} {{ form.status_pernikahan.errors }}</div>
+    {% if not is_update %}
+    <div class="mb-6 overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
+        <div class="grid grid-cols-2 gap-px bg-gray-200 md:grid-cols-8">
+            <a href="?step=1" class="px-3 py-4 text-center text-xs font-semibold {% if current_step == '1' %}bg-indigo-600 text-white{% else %}bg-white text-gray-600 hover:bg-gray-50{% endif %}">1. Data Pribadi</a>
+            <a href="?step=2" class="px-3 py-4 text-center text-xs font-semibold {% if current_step == '2' %}bg-indigo-600 text-white{% else %}bg-white text-gray-600 hover:bg-gray-50{% endif %}">2. Alamat</a>
+            <a href="?step=3" class="px-3 py-4 text-center text-xs font-semibold {% if current_step == '3' %}bg-indigo-600 text-white{% else %}bg-white text-gray-600 hover:bg-gray-50{% endif %}">3. Program</a>
+            <a href="?step=4" class="px-3 py-4 text-center text-xs font-semibold {% if current_step == '4' %}bg-indigo-600 text-white{% else %}bg-white text-gray-600 hover:bg-gray-50{% endif %}">4. Ekonomi</a>
+            <a href="?step=5" class="px-3 py-4 text-center text-xs font-semibold {% if current_step == '5' %}bg-indigo-600 text-white{% else %}bg-white text-gray-600 hover:bg-gray-50{% endif %}">5. Fisik</a>
+            <a href="?step=6" class="px-3 py-4 text-center text-xs font-semibold {% if current_step == '6' %}bg-indigo-600 text-white{% else %}bg-white text-gray-600 hover:bg-gray-50{% endif %}">6. Personal</a>
+            <a href="?step=7" class="px-3 py-4 text-center text-xs font-semibold {% if current_step == '7' %}bg-indigo-600 text-white{% else %}bg-white text-gray-600 hover:bg-gray-50{% endif %}">7. Pendidikan</a>
+            <a href="?step=8" class="px-3 py-4 text-center text-xs font-semibold {% if current_step == '8' %}bg-indigo-600 text-white{% else %}bg-white text-gray-600 hover:bg-gray-50{% endif %}">8. Pekerjaan / Keluarga / Dokumen</a>
         </div>
     </div>
     {% endif %}
 
-    {% if current_step == '2' %}
-    <div class="card mb-4">
-        <div class="card-header bg-primary text-white">Alamat</div>
-        <div class="card-body">
-            <div class="mb-3">{{ form.alamat_ktp.label_tag }} {{ form.alamat_ktp }} {{ form.alamat_ktp.errors }}</div>
-            <div class="mb-3">{{ form.alamat_domisili.label_tag }} {{ form.alamat_domisili }} {{ form.alamat_domisili.errors }}</div>
-        </div>
-    </div>
-    {% endif %}
+    <form method="post" enctype="multipart/form-data" class="space-y-6">
+        {% csrf_token %}
+        <input type="hidden" name="step" value="{{ current_step }}">
+        <input type="hidden" name="next_target" value="{{ next_target|default:'peserta_profile' }}">
 
-    {% if current_step == '3' %}
-    <div class="card mb-4">
-        <div class="card-header bg-primary text-white">Program & Motivasi</div>
-        <div class="card-body">
-            <div class="mb-3">{{ form.minat_program.label_tag }} {{ form.minat_program }} {{ form.minat_program.errors }}</div>
-            <div class="mb-3">{{ form.pengalaman_ke_jepang.label_tag }} {{ form.pengalaman_ke_jepang }} {{ form.pengalaman_ke_jepang.errors }}</div>
-            <div class="mb-3">{{ form.tujuan_ke_jepang.label_tag }} {{ form.tujuan_ke_jepang }} {{ form.tujuan_ke_jepang.errors }}</div>
+        {% if is_update or current_step == '1' %}
+        <div class="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm sm:p-8">
+            <div class="mb-5">
+                <h2 class="text-lg font-semibold text-gray-900">Data Pribadi</h2>
+                <p class="mt-1 text-sm text-gray-500">Isi data identitas utama peserta.</p>
+            </div>
+            <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <div>
+                    <label class="mb-1.5 block text-sm font-medium text-gray-700">{{ form.nama_lengkap.label }}</label>
+                    {{ form.nama_lengkap }}
+                    {% if form.nama_lengkap.errors %}<p class="mt-1.5 text-sm text-red-600">{{ form.nama_lengkap.errors|striptags }}</p>{% endif %}
+                </div>
+                <div>
+                    <label class="mb-1.5 block text-sm font-medium text-gray-700">{{ form.nama_lengkap_katakana.label }}</label>
+                    {{ form.nama_lengkap_katakana }}
+                    {% if form.nama_lengkap_katakana.errors %}<p class="mt-1.5 text-sm text-red-600">{{ form.nama_lengkap_katakana.errors|striptags }}</p>{% endif %}
+                </div>
+                <div>
+                    <label class="mb-1.5 block text-sm font-medium text-gray-700">{{ form.tanggal_lahir.label }}</label>
+                    {{ form.tanggal_lahir }}
+                    {% if form.tanggal_lahir.errors %}<p class="mt-1.5 text-sm text-red-600">{{ form.tanggal_lahir.errors|striptags }}</p>{% endif %}
+                </div>
+                <div>
+                    <label class="mb-1.5 block text-sm font-medium text-gray-700">{{ form.jenis_kelamin.label }}</label>
+                    {{ form.jenis_kelamin }}
+                    {% if form.jenis_kelamin.errors %}<p class="mt-1.5 text-sm text-red-600">{{ form.jenis_kelamin.errors|striptags }}</p>{% endif %}
+                </div>
+                <div>
+                    <label class="mb-1.5 block text-sm font-medium text-gray-700">{{ form.agama.label }}</label>
+                    {{ form.agama }}
+                    {% if form.agama.errors %}<p class="mt-1.5 text-sm text-red-600">{{ form.agama.errors|striptags }}</p>{% endif %}
+                </div>
+                <div>
+                    <label class="mb-1.5 block text-sm font-medium text-gray-700">{{ form.nomor_hp.label }}</label>
+                    {{ form.nomor_hp }}
+                    {% if form.nomor_hp.errors %}<p class="mt-1.5 text-sm text-red-600">{{ form.nomor_hp.errors|striptags }}</p>{% endif %}
+                </div>
+                <div class="md:col-span-2">
+                    <label class="mb-1.5 block text-sm font-medium text-gray-700">{{ form.status_pernikahan.label }}</label>
+                    {{ form.status_pernikahan }}
+                    {% if form.status_pernikahan.errors %}<p class="mt-1.5 text-sm text-red-600">{{ form.status_pernikahan.errors|striptags }}</p>{% endif %}
+                </div>
+            </div>
         </div>
-    </div>
-    {% endif %}
+        {% endif %}
 
-    {% if current_step == '4' %}
-    <div class="card mb-4">
-        <div class="card-header bg-primary text-white">Ekonomi</div>
-        <div class="card-body">
-            <div class="mb-3">{{ form.penghasilan_keluarga.label_tag }} {{ form.penghasilan_keluarga }} {{ form.penghasilan_keluarga.errors }}</div>
-            <div class="mb-3">{{ form.target_penabungan.label_tag }} {{ form.target_penabungan }} {{ form.target_penabungan.errors }}</div>
+        {% if is_update or current_step == '2' %}
+        <div class="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm sm:p-8">
+            <div class="mb-5">
+                <h2 class="text-lg font-semibold text-gray-900">Alamat</h2>
+                <p class="mt-1 text-sm text-gray-500">Lengkapi alamat KTP dan domisili.</p>
+            </div>
+            <div class="grid grid-cols-1 gap-4">
+                <div>
+                    <label class="mb-1.5 block text-sm font-medium text-gray-700">{{ form.alamat_ktp.label }}</label>
+                    {{ form.alamat_ktp }}
+                    {% if form.alamat_ktp.errors %}<p class="mt-1.5 text-sm text-red-600">{{ form.alamat_ktp.errors|striptags }}</p>{% endif %}
+                </div>
+                <div>
+                    <label class="mb-1.5 block text-sm font-medium text-gray-700">{{ form.alamat_domisili.label }}</label>
+                    {{ form.alamat_domisili }}
+                    {% if form.alamat_domisili.errors %}<p class="mt-1.5 text-sm text-red-600">{{ form.alamat_domisili.errors|striptags }}</p>{% endif %}
+                </div>
+            </div>
         </div>
-    </div>
-    {% endif %}
+        {% endif %}
 
-    {% if current_step == '5' %}
-    <div class="card mb-4">
-        <div class="card-header bg-primary text-white">Fisik & Kesehatan</div>
-        <div class="card-body">
-            <div class="mb-3">{{ form.berat_badan.label_tag }} {{ form.berat_badan }} {{ form.berat_badan.errors }}</div>
-            <div class="mb-3">{{ form.tinggi_badan.label_tag }} {{ form.tinggi_badan }} {{ form.tinggi_badan.errors }}</div>
-            <div class="mb-3">{{ form.cek_mata_kanan.label_tag }} {{ form.cek_mata_kanan }} {{ form.cek_mata_kanan.errors }}</div>
-            <div class="mb-3">{{ form.cek_mata_kiri.label_tag }} {{ form.cek_mata_kiri }} {{ form.cek_mata_kiri.errors }}</div>
-            <div class="mb-3">{{ form.golongan_darah.label_tag }} {{ form.golongan_darah }} {{ form.golongan_darah.errors }}</div>
-            <div class="mb-3">{{ form.tangan_dominan.label_tag }} {{ form.tangan_dominan }} {{ form.tangan_dominan.errors }}</div>
+        {% if is_update or current_step == '3' %}
+        <div class="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm sm:p-8">
+            <div class="mb-5">
+                <h2 class="text-lg font-semibold text-gray-900">Program & Motivasi</h2>
+                <p class="mt-1 text-sm text-gray-500">Masukkan minat program dan tujuan Anda.</p>
+            </div>
+            <div class="grid grid-cols-1 gap-4">
+                <div>
+                    <label class="mb-1.5 block text-sm font-medium text-gray-700">{{ form.minat_program.label }}</label>
+                    {{ form.minat_program }}
+                    {% if form.minat_program.errors %}<p class="mt-1.5 text-sm text-red-600">{{ form.minat_program.errors|striptags }}</p>{% endif %}
+                </div>
+                <div>
+                    <label class="mb-1.5 block text-sm font-medium text-gray-700">{{ form.pengalaman_ke_jepang.label }}</label>
+                    {{ form.pengalaman_ke_jepang }}
+                    {% if form.pengalaman_ke_jepang.errors %}<p class="mt-1.5 text-sm text-red-600">{{ form.pengalaman_ke_jepang.errors|striptags }}</p>{% endif %}
+                </div>
+                <div>
+                    <label class="mb-1.5 block text-sm font-medium text-gray-700">{{ form.tujuan_ke_jepang.label }}</label>
+                    {{ form.tujuan_ke_jepang }}
+                    {% if form.tujuan_ke_jepang.errors %}<p class="mt-1.5 text-sm text-red-600">{{ form.tujuan_ke_jepang.errors|striptags }}</p>{% endif %}
+                </div>
+            </div>
         </div>
-    </div>
-    {% endif %}
+        {% endif %}
 
-    {% if current_step == '6' %}
-    <div class="card mb-4">
-        <div class="card-header bg-primary text-white">Personal</div>
-        <div class="card-body">
-            <div class="mb-3">{{ form.alergi_makanan.label_tag }} {{ form.alergi_makanan }} {{ form.alergi_makanan.errors }}</div>
-            <div class="mb-3">{{ form.pantangan_makanan.label_tag }} {{ form.pantangan_makanan }} {{ form.pantangan_makanan.errors }}</div>
-            <div class="mb-3">{{ form.riwayat_penyakit.label_tag }} {{ form.riwayat_penyakit }} {{ form.riwayat_penyakit.errors }}</div>
-            <div class="mb-3">{{ form.kelebihan.label_tag }} {{ form.kelebihan }} {{ form.kelebihan.errors }}</div>
-            <div class="mb-3">{{ form.kekurangan.label_tag }} {{ form.kekurangan }} {{ form.kekurangan.errors }}</div>
-            <div class="mb-3">{{ form.hobi.label_tag }} {{ form.hobi }} {{ form.hobi.errors }}</div>
+        {% if is_update or current_step == '4' %}
+        <div class="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm sm:p-8">
+            <div class="mb-5">
+                <h2 class="text-lg font-semibold text-gray-900">Ekonomi</h2>
+                <p class="mt-1 text-sm text-gray-500">Informasi ekonomi keluarga dan target menabung.</p>
+            </div>
+            <div class="grid grid-cols-1 gap-4">
+                <div>
+                    <label class="mb-1.5 block text-sm font-medium text-gray-700">{{ form.penghasilan_keluarga.label }}</label>
+                    {{ form.penghasilan_keluarga }}
+                    {% if form.penghasilan_keluarga.errors %}<p class="mt-1.5 text-sm text-red-600">{{ form.penghasilan_keluarga.errors|striptags }}</p>{% endif %}
+                </div>
+                <div>
+                    <label class="mb-1.5 block text-sm font-medium text-gray-700">{{ form.target_penabungan.label }}</label>
+                    {{ form.target_penabungan }}
+                    {% if form.target_penabungan.errors %}<p class="mt-1.5 text-sm text-red-600">{{ form.target_penabungan.errors|striptags }}</p>{% endif %}
+                </div>
+            </div>
         </div>
-    </div>
-    {% endif %}
+        {% endif %}
 
-    {% if current_step == '7' %}
-    <!-- Pendidikan -->
-    <div class="card mb-4">
-        <div class="card-header d-flex justify-content-between">
-            <span>Riwayat Pendidikan</span>
-            <button type="button" class="btn btn-sm btn-primary add-form" data-prefix="{{ pendidikan.prefix }}">+ Tambah</button>
+        {% if is_update or current_step == '5' %}
+        <div class="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm sm:p-8">
+            <div class="mb-5">
+                <h2 class="text-lg font-semibold text-gray-900">Fisik & Kesehatan</h2>
+                <p class="mt-1 text-sm text-gray-500">Lengkapi data fisik peserta.</p>
+            </div>
+            <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <div>
+                    <label class="mb-1.5 block text-sm font-medium text-gray-700">{{ form.berat_badan.label }}</label>
+                    {{ form.berat_badan }}
+                    {% if form.berat_badan.errors %}<p class="mt-1.5 text-sm text-red-600">{{ form.berat_badan.errors|striptags }}</p>{% endif %}
+                </div>
+                <div>
+                    <label class="mb-1.5 block text-sm font-medium text-gray-700">{{ form.tinggi_badan.label }}</label>
+                    {{ form.tinggi_badan }}
+                    {% if form.tinggi_badan.errors %}<p class="mt-1.5 text-sm text-red-600">{{ form.tinggi_badan.errors|striptags }}</p>{% endif %}
+                </div>
+                <div>
+                    <label class="mb-1.5 block text-sm font-medium text-gray-700">{{ form.cek_mata_kanan.label }}</label>
+                    {{ form.cek_mata_kanan }}
+                    {% if form.cek_mata_kanan.errors %}<p class="mt-1.5 text-sm text-red-600">{{ form.cek_mata_kanan.errors|striptags }}</p>{% endif %}
+                </div>
+                <div>
+                    <label class="mb-1.5 block text-sm font-medium text-gray-700">{{ form.cek_mata_kiri.label }}</label>
+                    {{ form.cek_mata_kiri }}
+                    {% if form.cek_mata_kiri.errors %}<p class="mt-1.5 text-sm text-red-600">{{ form.cek_mata_kiri.errors|striptags }}</p>{% endif %}
+                </div>
+                <div>
+                    <label class="mb-1.5 block text-sm font-medium text-gray-700">{{ form.golongan_darah.label }}</label>
+                    {{ form.golongan_darah }}
+                    {% if form.golongan_darah.errors %}<p class="mt-1.5 text-sm text-red-600">{{ form.golongan_darah.errors|striptags }}</p>{% endif %}
+                </div>
+                <div>
+                    <label class="mb-1.5 block text-sm font-medium text-gray-700">{{ form.tangan_dominan.label }}</label>
+                    {{ form.tangan_dominan }}
+                    {% if form.tangan_dominan.errors %}<p class="mt-1.5 text-sm text-red-600">{{ form.tangan_dominan.errors|striptags }}</p>{% endif %}
+                </div>
+            </div>
         </div>
-        <div class="card-body">
+        {% endif %}
+
+        {% if is_update or current_step == '6' %}
+        <div class="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm sm:p-8">
+            <div class="mb-5">
+                <h2 class="text-lg font-semibold text-gray-900">Personal</h2>
+                <p class="mt-1 text-sm text-gray-500">Informasi kebiasaan, kesehatan, dan karakter personal.</p>
+            </div>
+            <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <div>
+                    <label class="mb-1.5 block text-sm font-medium text-gray-700">{{ form.alergi_makanan.label }}</label>
+                    {{ form.alergi_makanan }}
+                    {% if form.alergi_makanan.errors %}<p class="mt-1.5 text-sm text-red-600">{{ form.alergi_makanan.errors|striptags }}</p>{% endif %}
+                </div>
+                <div>
+                    <label class="mb-1.5 block text-sm font-medium text-gray-700">{{ form.pantangan_makanan.label }}</label>
+                    {{ form.pantangan_makanan }}
+                    {% if form.pantangan_makanan.errors %}<p class="mt-1.5 text-sm text-red-600">{{ form.pantangan_makanan.errors|striptags }}</p>{% endif %}
+                </div>
+                <div class="md:col-span-2">
+                    <label class="mb-1.5 block text-sm font-medium text-gray-700">{{ form.riwayat_penyakit.label }}</label>
+                    {{ form.riwayat_penyakit }}
+                    {% if form.riwayat_penyakit.errors %}<p class="mt-1.5 text-sm text-red-600">{{ form.riwayat_penyakit.errors|striptags }}</p>{% endif %}
+                </div>
+                <div>
+                    <label class="mb-1.5 block text-sm font-medium text-gray-700">{{ form.kelebihan.label }}</label>
+                    {{ form.kelebihan }}
+                    {% if form.kelebihan.errors %}<p class="mt-1.5 text-sm text-red-600">{{ form.kelebihan.errors|striptags }}</p>{% endif %}
+                </div>
+                <div>
+                    <label class="mb-1.5 block text-sm font-medium text-gray-700">{{ form.kekurangan.label }}</label>
+                    {{ form.kekurangan }}
+                    {% if form.kekurangan.errors %}<p class="mt-1.5 text-sm text-red-600">{{ form.kekurangan.errors|striptags }}</p>{% endif %}
+                </div>
+                <div class="md:col-span-2">
+                    <label class="mb-1.5 block text-sm font-medium text-gray-700">{{ form.hobi.label }}</label>
+                    {{ form.hobi }}
+                    {% if form.hobi.errors %}<p class="mt-1.5 text-sm text-red-600">{{ form.hobi.errors|striptags }}</p>{% endif %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if is_update or current_step == '7' %}
+        <div class="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm sm:p-8">
+            <div class="mb-5 flex items-center justify-between gap-3">
+                <div>
+                    <h2 class="text-lg font-semibold text-gray-900">Riwayat Pendidikan</h2>
+                    <p class="mt-1 text-sm text-gray-500">Tambahkan minimal satu riwayat pendidikan.</p>
+                </div>
+                <button type="button" class="add-form inline-flex items-center rounded-lg bg-indigo-600 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-700 transition-colors" data-prefix="{{ pendidikan.prefix }}">+ Tambah</button>
+            </div>
             {{ pendidikan.management_form }}
-            <div class="formset-container" id="formset-{{ pendidikan.prefix }}" data-prefix="{{ pendidikan.prefix }}">
+            <div class="formset-container space-y-3" id="formset-{{ pendidikan.prefix }}" data-prefix="{{ pendidikan.prefix }}">
                 {% for form in pendidikan %}
-                    <div class="formset-item border p-3 mb-2">{{ form.as_p }}<button type="button" class="btn btn-danger btn-sm remove-form">Hapus</button></div>
+                    <div class="formset-item rounded-lg border border-gray-200 bg-gray-50 p-4">
+                        {{ form.as_p }}
+                        <button type="button" class="remove-form mt-2 inline-flex items-center rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs font-semibold text-red-700 hover:bg-red-100 transition-colors">Hapus</button>
+                    </div>
                 {% endfor %}
             </div>
             <template id="empty-form-{{ pendidikan.prefix }}">
-                <div class="formset-item border p-3 mb-2">{{ pendidikan.empty_form.as_p|safe }}<button type="button" class="btn btn-danger btn-sm remove-form">Hapus</button></div>
+                <div class="formset-item rounded-lg border border-gray-200 bg-gray-50 p-4">
+                    {{ pendidikan.empty_form.as_p|safe }}
+                    <button type="button" class="remove-form mt-2 inline-flex items-center rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs font-semibold text-red-700 hover:bg-red-100 transition-colors">Hapus</button>
+                </div>
             </template>
         </div>
-    </div>
-    {% endif %}
-
-    {% if current_step == '8' %}
-    <!-- Pekerjaan -->
-    <div class="card mb-4">
-        <div class="card-header d-flex justify-content-between">
-            <span>Riwayat Pekerjaan</span>
-            <button type="button" class="btn btn-sm btn-primary add-form" data-prefix="{{ pekerjaan.prefix }}">+ Tambah</button>
-        </div>
-        <div class="card-body">
-            {{ pekerjaan.management_form }}
-            <div class="formset-container" id="formset-{{ pekerjaan.prefix }}" data-prefix="{{ pekerjaan.prefix }}">
-                {% for form in pekerjaan %}
-                    <div class="formset-item border p-3 mb-2">{{ form.as_p }}<button type="button" class="btn btn-danger btn-sm remove-form">Hapus</button></div>
-                {% endfor %}
-            </div>
-            <template id="empty-form-{{ pekerjaan.prefix }}">
-                <div class="formset-item border p-3 mb-2">{{ pekerjaan.empty_form.as_p|safe }}<button type="button" class="btn btn-danger btn-sm remove-form">Hapus</button></div>
-            </template>
-        </div>
-    </div>
-
-    <!-- Keluarga -->
-    <div class="card mb-4">
-        <div class="card-header d-flex justify-content-between">
-            <span>Data Keluarga</span>
-            <button type="button" class="btn btn-sm btn-primary add-form" data-prefix="{{ keluarga.prefix }}">+ Tambah</button>
-        </div>
-        <div class="card-body">
-            {{ keluarga.management_form }}
-            <div class="formset-container" id="formset-{{ keluarga.prefix }}" data-prefix="{{ keluarga.prefix }}">
-                {% for form in keluarga %}
-                    <div class="formset-item border p-3 mb-2">{{ form.as_p }}<button type="button" class="btn btn-danger btn-sm remove-form">Hapus</button></div>
-                {% endfor %}
-            </div>
-            <template id="empty-form-{{ keluarga.prefix }}">
-                <div class="formset-item border p-3 mb-2">{{ keluarga.empty_form.as_p|safe }}<button type="button" class="btn btn-danger btn-sm remove-form">Hapus</button></div>
-            </template>
-        </div>
-    </div>
-
-    <!-- Dokumen -->
-    <div class="card mb-4">
-        <div class="card-header d-flex justify-content-between">
-            <span>Dokumen</span>
-            <button type="button" class="btn btn-sm btn-primary add-form" data-prefix="{{ dokumen.prefix }}">+ Tambah</button>
-        </div>
-        <div class="card-body">
-            {{ dokumen.management_form }}
-            <div class="formset-container" id="formset-{{ dokumen.prefix }}" data-prefix="{{ dokumen.prefix }}">
-                {% for form in dokumen %}
-                    <div class="formset-item border p-3 mb-2">{{ form.as_p }}<button type="button" class="btn btn-danger btn-sm remove-form">Hapus</button></div>
-                {% endfor %}
-            </div>
-            <template id="empty-form-{{ dokumen.prefix }}">
-                <div class="formset-item border p-3 mb-2">{{ dokumen.empty_form.as_p|safe }}<button type="button" class="btn btn-danger btn-sm remove-form">Hapus</button></div>
-            </template>
-        </div>
-    </div>
-    {% endif %}
-
-    <!-- Navigation Buttons -->
-    <div class="d-flex justify-content-between">
-        {% if current_step != '1' %}
-        <button type="button" onclick="window.location.href='?step={{ current_step|add:-1 }}'" class="btn btn-secondary">Previous</button>
-        {% else %}
-        <div></div>
         {% endif %}
 
-        {% if current_step != '8' %}
-        <button type="submit" class="btn btn-primary">Next</button>
-        {% else %}
-        <button type="submit" class="btn btn-success">Submit</button>
+        {% if is_update or current_step == '8' %}
+        <div class="grid gap-6">
+            <div class="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm sm:p-8">
+                <div class="mb-5 flex items-center justify-between gap-3">
+                    <div>
+                        <h2 class="text-lg font-semibold text-gray-900">Riwayat Pekerjaan</h2>
+                        <p class="mt-1 text-sm text-gray-500">Tambahkan riwayat pekerjaan sebelumnya.</p>
+                    </div>
+                    <button type="button" class="add-form inline-flex items-center rounded-lg bg-indigo-600 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-700 transition-colors" data-prefix="{{ pekerjaan.prefix }}">+ Tambah</button>
+                </div>
+                {{ pekerjaan.management_form }}
+                <div class="formset-container space-y-3" id="formset-{{ pekerjaan.prefix }}" data-prefix="{{ pekerjaan.prefix }}">
+                    {% for form in pekerjaan %}
+                        <div class="formset-item rounded-lg border border-gray-200 bg-gray-50 p-4">{{ form.as_p }}<button type="button" class="remove-form mt-2 inline-flex items-center rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs font-semibold text-red-700 hover:bg-red-100 transition-colors">Hapus</button></div>
+                    {% endfor %}
+                </div>
+                <template id="empty-form-{{ pekerjaan.prefix }}">
+                    <div class="formset-item rounded-lg border border-gray-200 bg-gray-50 p-4">{{ pekerjaan.empty_form.as_p|safe }}<button type="button" class="remove-form mt-2 inline-flex items-center rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs font-semibold text-red-700 hover:bg-red-100 transition-colors">Hapus</button></div>
+                </template>
+            </div>
+
+            <div class="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm sm:p-8">
+                <div class="mb-5 flex items-center justify-between gap-3">
+                    <div>
+                        <h2 class="text-lg font-semibold text-gray-900">Data Keluarga</h2>
+                        <p class="mt-1 text-sm text-gray-500">Tambahkan anggota keluarga inti.</p>
+                    </div>
+                    <button type="button" class="add-form inline-flex items-center rounded-lg bg-indigo-600 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-700 transition-colors" data-prefix="{{ keluarga.prefix }}">+ Tambah</button>
+                </div>
+                {{ keluarga.management_form }}
+                <div class="formset-container space-y-3" id="formset-{{ keluarga.prefix }}" data-prefix="{{ keluarga.prefix }}">
+                    {% for form in keluarga %}
+                        <div class="formset-item rounded-lg border border-gray-200 bg-gray-50 p-4">{{ form.as_p }}<button type="button" class="remove-form mt-2 inline-flex items-center rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs font-semibold text-red-700 hover:bg-red-100 transition-colors">Hapus</button></div>
+                    {% endfor %}
+                </div>
+                <template id="empty-form-{{ keluarga.prefix }}">
+                    <div class="formset-item rounded-lg border border-gray-200 bg-gray-50 p-4">{{ keluarga.empty_form.as_p|safe }}<button type="button" class="remove-form mt-2 inline-flex items-center rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs font-semibold text-red-700 hover:bg-red-100 transition-colors">Hapus</button></div>
+                </template>
+            </div>
+
+            <div class="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm sm:p-8">
+                <div class="mb-5 flex items-center justify-between gap-3">
+                    <div>
+                        <h2 class="text-lg font-semibold text-gray-900">Dokumen</h2>
+                        <p class="mt-1 text-sm text-gray-500">Unggah dokumen yang diperlukan.</p>
+                    </div>
+                    <button type="button" class="add-form inline-flex items-center rounded-lg bg-indigo-600 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-700 transition-colors" data-prefix="{{ dokumen.prefix }}">+ Tambah</button>
+                </div>
+                {{ dokumen.management_form }}
+                <div class="formset-container space-y-3" id="formset-{{ dokumen.prefix }}" data-prefix="{{ dokumen.prefix }}">
+                    {% for form in dokumen %}
+                        <div class="formset-item rounded-lg border border-gray-200 bg-gray-50 p-4">{{ form.as_p }}<button type="button" class="remove-form mt-2 inline-flex items-center rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs font-semibold text-red-700 hover:bg-red-100 transition-colors">Hapus</button></div>
+                    {% endfor %}
+                </div>
+                <template id="empty-form-{{ dokumen.prefix }}">
+                    <div class="formset-item rounded-lg border border-gray-200 bg-gray-50 p-4">{{ dokumen.empty_form.as_p|safe }}<button type="button" class="remove-form mt-2 inline-flex items-center rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs font-semibold text-red-700 hover:bg-red-100 transition-colors">Hapus</button></div>
+                </template>
+            </div>
+        </div>
         {% endif %}
-    </div>
-</form>
+
+        {% if is_update %}
+        <div class="flex items-center justify-end gap-3">
+            <button type="submit" class="inline-flex items-center rounded-lg bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-emerald-700 transition-colors">Simpan Perubahan</button>
+        </div>
+        {% else %}
+        <div class="flex items-center justify-between gap-3">
+            {% if current_step != '1' %}
+                <button type="submit" name="navigation" value="previous" class="inline-flex items-center rounded-lg border border-gray-300 px-5 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors">Previous</button>
+            {% else %}
+                <div></div>
+            {% endif %}
+
+            {% if current_step != '8' %}
+                <button type="submit" name="navigation" value="next" class="inline-flex items-center rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700 transition-colors">Next</button>
+            {% else %}
+                <button type="submit" name="navigation" value="next" class="inline-flex items-center rounded-lg bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-emerald-700 transition-colors">Submit</button>
+            {% endif %}
+        </div>
+        {% endif %}
+    </form>
+</section>
+
+<style>
+    /* Keep widget rendering clean without changing the form classes in Python */
+    #id_nama_lengkap,
+    #id_nama_lengkap_katakana,
+    #id_tanggal_lahir,
+    #id_jenis_kelamin,
+    #id_agama,
+    #id_nomor_hp,
+    #id_status_pernikahan,
+    #id_alamat_ktp,
+    #id_alamat_domisili,
+    #id_minat_program,
+    #id_pengalaman_ke_jepang,
+    #id_tujuan_ke_jepang,
+    #id_penghasilan_keluarga,
+    #id_target_penabungan,
+    #id_berat_badan,
+    #id_tinggi_badan,
+    #id_cek_mata_kanan,
+    #id_cek_mata_kiri,
+    #id_golongan_darah,
+    #id_tangan_dominan,
+    #id_alergi_makanan,
+    #id_pantangan_makanan,
+    #id_riwayat_penyakit,
+    #id_kelebihan,
+    #id_kekurangan,
+    #id_hobi,
+    #id_tahun_masuk,
+    #id_tahun_lulus,
+    #id_tanggal_masuk,
+    #id_tanggal_keluar,
+    #id_tanggal_lahir,
+    #id_jenis_dokumen,
+    #id_file,
+    #id_name,
+    #id_lokasi_kerja,
+    #id_laporan,
+    #id_pendidikan_set-0-institusi,
+    #id_pendidikan_set-0-jenjang,
+    #id_pekerjaan_set-0-perusahaan,
+    #id_keluarga_set-0-nama,
+    #id_dokumen_set-0-nama {
+        width: 100%;
+        border-radius: 0.75rem;
+        border: 1px solid #d1d5db;
+        background: #fff;
+        color: #111827;
+        padding: 0.75rem 0.9rem;
+        font-size: 0.875rem;
+        line-height: 1.25rem;
+    }
+
+    #id_nama_lengkap:focus,
+    #id_nama_lengkap_katakana:focus,
+    #id_tanggal_lahir:focus,
+    #id_jenis_kelamin:focus,
+    #id_agama:focus,
+    #id_nomor_hp:focus,
+    #id_status_pernikahan:focus,
+    #id_alamat_ktp:focus,
+    #id_alamat_domisili:focus,
+    #id_minat_program:focus,
+    #id_pengalaman_ke_jepang:focus,
+    #id_tujuan_ke_jepang:focus,
+    #id_penghasilan_keluarga:focus,
+    #id_target_penabungan:focus,
+    #id_berat_badan:focus,
+    #id_tinggi_badan:focus,
+    #id_cek_mata_kanan:focus,
+    #id_cek_mata_kiri:focus,
+    #id_golongan_darah:focus,
+    #id_tangan_dominan:focus,
+    #id_alergi_makanan:focus,
+    #id_pantangan_makanan:focus,
+    #id_riwayat_penyakit:focus,
+    #id_kelebihan:focus,
+    #id_kekurangan:focus,
+    #id_hobi:focus,
+    #id_tahun_masuk:focus,
+    #id_tahun_lulus:focus,
+    #id_tanggal_masuk:focus,
+    #id_tanggal_keluar:focus,
+    #id_tanggal_lahir:focus,
+    #id_jenis_dokumen:focus,
+    #id_file:focus,
+    #id_name:focus,
+    #id_lokasi_kerja:focus,
+    #id_laporan:focus {
+        outline: none;
+        border-color: #4f46e5;
+        box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.18);
+    }
+
+    textarea {
+        min-height: 110px;
+        resize: vertical;
+    }
+
+    select {
+        background-color: #fff;
+    }
+
+    .formset-item ul,
+    .formset-item ol {
+        margin: 0.5rem 0 0;
+        padding-left: 1.25rem;
+    }
+
+    .formset-item p {
+        margin-bottom: 0.75rem;
+    }
+</style>
 
 {% endblock %}

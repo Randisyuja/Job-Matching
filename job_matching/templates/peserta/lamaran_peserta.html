@@ -72,7 +72,7 @@
 					</div>
 
 					<div class="flex items-center gap-3 pt-4 border-t border-gray-100">
-						<a href="{% url 'lamaran_detail' item.pk %}" 
+						<a href="{% url 'lamaran_peserta_detail' item.pk %}" 
 						   class="inline-flex items-center px-4 py-2 rounded-lg bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-700 transition">
 							<svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
@@ -87,7 +87,7 @@
 						</a>
 
 						<form method="post"
-							  action="{% url 'lamaran_delete' item.pk %}"
+							  action="{% url 'lamaran_peserta_delete' item.pk %}"
 							  class="inline-block ml-auto"
 							  onsubmit="return confirm('Yakin ingin menghapus lamaran ini?')">
 							{% csrf_token %}

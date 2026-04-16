@@ -1,12 +1,66 @@
 {% extends "staff/staff_base.html" %}
 {% block content %}
 
-<h2>Form Jenis Pekerjaan</h2>
+<section class="max-w-2xl mx-auto py-8">
+    <div class="mb-6">
+        <h1 class="text-2xl font-semibold text-gray-900">Tambah Jenis Pekerjaan</h1>
+        <p class="mt-1 text-sm text-gray-500">Tambahkan kategori pekerjaan baru untuk kebutuhan lowongan.</p>
+    </div>
 
-<form method="post" enctype="multipart/form-data">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button class="btn btn-success">Simpan</button>
-</form>
+    <div class="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm sm:p-8">
+        {% if form.non_field_errors %}
+            <div class="mb-5 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+                {% for error in form.non_field_errors %}
+                    <p>{{ error }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <form method="post" enctype="multipart/form-data" class="space-y-5">
+            {% csrf_token %}
+
+            {% for field in form %}
+                <div>
+                    <label for="{{ field.id_for_label }}" class="mb-1.5 block text-sm font-medium text-gray-700">
+                        {{ field.label }}
+                        {% if field.field.required %}<span class="text-red-500">*</span>{% endif %}
+                    </label>
+
+                    {% if field.name == 'file_path' %}
+                        <input
+                            type="file"
+                            name="{{ field.html_name }}"
+                            id="{{ field.id_for_label }}"
+                            {% if field.field.required %}required{% endif %}
+                            class="block w-full text-sm text-gray-700 file:mr-4 file:rounded-lg file:border-0 file:bg-indigo-50 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-indigo-700 hover:file:bg-indigo-100"
+                        >
+                    {% else %}
+                        <input
+                            type="{% if field.field.widget.input_type %}{{ field.field.widget.input_type }}{% else %}text{% endif %}"
+                            name="{{ field.html_name }}"
+                            id="{{ field.id_for_label }}"
+                            value="{% if field.value != None %}{{ field.value }}{% endif %}"
+                            {% if field.field.required %}required{% endif %}
+                            class="w-full rounded-lg border {% if field.errors %}border-red-300 focus:border-red-500 focus:ring-red-500{% else %}border-gray-300 focus:border-indigo-500 focus:ring-indigo-500{% endif %} px-3 py-2.5 text-sm text-gray-800 focus:outline-none focus:ring-2"
+                        >
+                    {% endif %}
+
+                    {% if field.errors %}
+                        <p class="mt-1.5 text-sm text-red-600">{{ field.errors|striptags }}</p>
+                    {% endif %}
+                </div>
+            {% endfor %}
+
+            <div class="flex items-center gap-3 pt-1">
+                <button type="submit" class="inline-flex items-center justify-center rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700 transition-colors">
+                    Simpan
+                </button>
+                <a href="{% url 'staff_jenis_list' %}" class="inline-flex items-center justify-center rounded-lg border border-gray-300 px-5 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors">
+                    Batal
+                </a>
+            </div>
+        </form>
+    </div>
+</section>
 
 {% endblock %}

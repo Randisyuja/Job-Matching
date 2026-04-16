@@ -1,0 +1,169 @@
+{% extends "peserta/peserta_base.html" %}
+
+{% block content %}
+<section class="max-w-4xl mx-auto px-6 py-8">
+	<div class="mb-6">
+		<a href="{% url 'lamaran_peserta' %}"
+		   class="inline-flex items-center text-sm text-gray-600 hover:text-indigo-600">
+			<svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+			</svg>
+			Kembali ke Lamaran Saya
+		</a>
+	</div>
+
+	<div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+		<!-- Header -->
+		<div class="bg-gradient-to-r from-indigo-500 to-indigo-600 px-8 py-6 text-white">
+			<div class="flex items-start justify-between">
+				<div>
+					<h1 class="text-2xl font-bold mb-2">Detail Lamaran</h1>
+					<p class="text-indigo-100">{{ lamaran.lowongan.jenis_pekerjaan.nama_pekerjaan }}</p>
+				</div>
+				{% if lamaran.status_lamaran == 'Pending' %}
+					<span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800">
+						{{ lamaran.status_lamaran }}
+					</span>
+				{% elif lamaran.status_lamaran == 'Direview' or lamaran.status_lamaran == 'Terdaftar' %}
+					<span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+						{{ lamaran.status_lamaran }}
+					</span>
+				{% elif lamaran.status_lamaran == 'Mendan 1' or lamaran.status_lamaran == 'Mendan 2' or lamaran.status_lamaran == 'Mensetsu' %}
+					<span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-800">
+						{{ lamaran.status_lamaran }}
+					</span>
+				{% elif lamaran.status_lamaran == 'GOUKAKU' %}
+					<span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+						{{ lamaran.status_lamaran }}
+					</span>
+				{% elif lamaran.status_lamaran == 'FU GOKAKU' %}
+					<span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800">
+						{{ lamaran.status_lamaran }}
+					</span>
+				{% else %}
+					<span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-800">
+						{{ lamaran.status_lamaran }}
+					</span>
+				{% endif %}
+			</div>
+		</div>
+
+		<!-- Content -->
+		<div class="p-8">
+			<!-- Informasi Lowongan -->
+			<div class="mb-8">
+				<h3 class="text-lg font-semibold text-gray-900 mb-4">Informasi Lowongan</h3>
+				<div class="grid grid-cols-1 md:grid-cols-2 gap-6 bg-gray-50 rounded-lg p-6">
+					<div>
+						<p class="text-sm text-gray-500 mb-1">Perusahaan</p>
+						<p class="text-base font-semibold text-gray-900">{{ lamaran.lowongan.nama_perusahaan }}</p>
+					</div>
+					<div>
+						<p class="text-sm text-gray-500 mb-1">Posisi</p>
+						<p class="text-base font-semibold text-gray-900">{{ lamaran.lowongan.jenis_pekerjaan.nama_pekerjaan }}</p>
+					</div>
+					<div>
+						<p class="text-sm text-gray-500 mb-1">Lokasi</p>
+						<p class="text-base font-semibold text-gray-900">{{ lamaran.lowongan.lokasi_kerja }}</p>
+					</div>
+					<div>
+						<p class="text-sm text-gray-500 mb-1">Tipe Pekerjaan</p>
+						<p class="text-base font-semibold text-gray-900">{{ lamaran.lowongan.tipe_pekerjaan }}</p>
+					</div>
+				</div>
+			</div>
+
+			<!-- Catatan & Status Lamaran -->
+			<div class="mb-8">
+				<h3 class="text-lg font-semibold text-gray-900 mb-4">Status & Timeline</h3>
+				<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+					<!-- Status Lamaran -->
+					<div class="bg-blue-50 rounded-lg p-6 border border-blue-200">
+						<h4 class="text-sm font-semibold text-gray-700 mb-3">Status Lamaran Saat Ini</h4>
+						<div class="flex items-center gap-3">
+							{% if lamaran.status_lamaran == 'Pending' %}
+								<span class="inline-flex items-center px-4 py-2 rounded-lg text-sm font-semibold bg-yellow-100 text-yellow-800">
+									🟡 {{ lamaran.status_lamaran }}
+								</span>
+							{% elif lamaran.status_lamaran == 'Direview' or lamaran.status_lamaran == 'Terdaftar' %}
+								<span class="inline-flex items-center px-4 py-2 rounded-lg text-sm font-semibold bg-blue-100 text-blue-800">
+									🔵 {{ lamaran.status_lamaran }}
+								</span>
+							{% elif lamaran.status_lamaran == 'Mendan 1' or lamaran.status_lamaran == 'Mendan 2' or lamaran.status_lamaran == 'Mensetsu' %}
+								<span class="inline-flex items-center px-4 py-2 rounded-lg text-sm font-semibold bg-purple-100 text-purple-800">
+									🟣 {{ lamaran.status_lamaran }}
+								</span>
+							{% elif lamaran.status_lamaran == 'GOUKAKU' %}
+								<span class="inline-flex items-center px-4 py-2 rounded-lg text-sm font-semibold bg-green-100 text-green-800">
+									✅ {{ lamaran.status_lamaran }}
+								</span>
+							{% elif lamaran.status_lamaran == 'FU GOKAKU' %}
+								<span class="inline-flex items-center px-4 py-2 rounded-lg text-sm font-semibold bg-red-100 text-red-800">
+									❌ {{ lamaran.status_lamaran }}
+								</span>
+							{% else %}
+								<span class="inline-flex items-center px-4 py-2 rounded-lg text-sm font-semibold bg-gray-100 text-gray-800">
+									{{ lamaran.status_lamaran }}
+								</span>
+							{% endif %}
+						</div>
+					</div>
+
+					<!-- Timeline -->
+					<div class="bg-indigo-50 rounded-lg p-6 border border-indigo-200">
+						<h4 class="text-sm font-semibold text-gray-700 mb-4">Timeline</h4>
+						<dl class="space-y-3">
+							<div>
+								<dt class="text-xs text-gray-600">Tanggal Lamar</dt>
+								<dd class="text-sm font-semibold text-gray-900">{{ lamaran.created_at|date:"d M Y H:i" }}</dd>
+							</div>
+							{% if lamaran.updated_at != lamaran.created_at %}
+							<div>
+								<dt class="text-xs text-gray-600">Terakhir Diupdate</dt>
+								<dd class="text-sm font-semibold text-gray-900">{{ lamaran.updated_at|date:"d M Y H:i" }}</dd>
+							</div>
+							{% endif %}
+						</dl>
+					</div>
+
+					<!-- Catatan -->
+					{% if lamaran.catatan %}
+					<div class="md:col-span-2 bg-amber-50 rounded-lg p-6 border border-amber-200">
+						<h4 class="text-sm font-semibold text-gray-700 mb-3">Catatan Lamaran Anda</h4>
+						<div class="bg-white rounded-lg p-4 border border-amber-100">
+							<p class="text-sm text-gray-700 whitespace-pre-line leading-relaxed">{{ lamaran.catatan }}</p>
+						</div>
+					</div>
+					{% endif %}
+				</div>
+			</div>
+
+			<!-- Action Buttons -->
+			<div class="flex items-center gap-3 pt-6 border-t border-gray-200">
+				<a href="{% url 'lowongan_detail' lamaran.lowongan.pk %}" 
+				   class="inline-flex items-center px-5 py-2.5 rounded-lg bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-700 transition">
+					<svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+					</svg>
+					Lihat Lowongan
+				</a>
+
+				<form method="post"
+					  action="{% url 'lamaran_peserta_delete' lamaran.pk %}"
+					  class="inline-block ml-auto"
+					  onsubmit="return confirm('Yakin ingin menghapus lamaran ini? Tindakan ini tidak bisa dibatalkan.')">
+					{% csrf_token %}
+					<button type="submit"
+							class="inline-flex items-center px-5 py-2.5 rounded-lg border border-red-300 text-red-600 text-sm font-medium hover:bg-red-50 transition">
+						<svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+						</svg>
+						Hapus Lamaran
+					</button>
+				</form>
+			</div>
+		</div>
+	</div>
+</section>
+{% endblock %}

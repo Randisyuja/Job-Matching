@@ -55,10 +55,143 @@
 			<!-- Informasi Peserta -->
 			<div class="mb-8">
 				<h3 class="text-lg font-semibold text-gray-900 mb-4">Informasi Peserta</h3>
-				<div class="bg-gray-50 rounded-lg p-4">
-					<p class="text-base font-medium text-gray-900">{{ lamaran.peserta.nama_lengkap }}</p>
-					{% if lamaran.peserta.nomor_hp %}
-						<p class="text-sm text-gray-600 mt-1">{{ lamaran.peserta.nomor_hp }}</p>
+				<div class="grid grid-cols-1 md:grid-cols-2 gap-6 bg-gray-50 rounded-lg p-6">
+					<!-- Data Pribadi -->
+					<div>
+						<h4 class="text-sm font-semibold text-gray-700 mb-3">Data Pribadi</h4>
+						<dl class="space-y-3">
+							<div>
+								<dt class="text-xs text-gray-500 font-medium">Nama Lengkap</dt>
+								<dd class="text-sm font-medium text-gray-900">{{ lamaran.peserta.nama_lengkap }}</dd>
+							</div>
+							<div>
+								<dt class="text-xs text-gray-500 font-medium">Email</dt>
+								<dd class="text-sm font-medium text-gray-900">
+									{% if lamaran.peserta.user.email %}
+										<a href="mailto:{{ lamaran.peserta.user.email }}" class="text-indigo-600 hover:text-indigo-700">{{ lamaran.peserta.user.email }}</a>
+									{% else %}
+										<span class="text-gray-500 italic">-</span>
+									{% endif %}
+								</dd>
+							</div>
+							<div>
+								<dt class="text-xs text-gray-500 font-medium">Nomor HP</dt>
+								<dd class="text-sm font-medium text-gray-900">
+									{% if lamaran.peserta.nomor_hp %}
+										{{ lamaran.peserta.nomor_hp }}
+									{% else %}
+										<span class="text-gray-500 italic">-</span>
+									{% endif %}
+								</dd>
+							</div>
+							<div>
+								<dt class="text-xs text-gray-500 font-medium">Tanggal Lahir</dt>
+								<dd class="text-sm font-medium text-gray-900">
+									{% if lamaran.peserta.tanggal_lahir %}
+										{{ lamaran.peserta.tanggal_lahir|date:"d M Y" }}
+									{% else %}
+										<span class="text-gray-500 italic">-</span>
+									{% endif %}
+								</dd>
+							</div>
+						</dl>
+					</div>
+
+					<!-- Informasi Tambahan -->
+					<div>
+						<h4 class="text-sm font-semibold text-gray-700 mb-3">Informasi Tambahan</h4>
+						<dl class="space-y-3">
+							<div>
+								<dt class="text-xs text-gray-500 font-medium">Jenis Kelamin</dt>
+								<dd class="text-sm font-medium text-gray-900">
+									{% if lamaran.peserta.jenis_kelamin %}
+										{{ lamaran.peserta.get_jenis_kelamin_display }}
+									{% else %}
+										<span class="text-gray-500 italic">-</span>
+									{% endif %}
+								</dd>
+							</div>
+							<div>
+								<dt class="text-xs text-gray-500 font-medium">Agama</dt>
+								<dd class="text-sm font-medium text-gray-900">
+									{% if lamaran.peserta.agama %}
+										{{ lamaran.peserta.get_agama_display }}
+									{% else %}
+										<span class="text-gray-500 italic">-</span>
+									{% endif %}
+								</dd>
+							</div>
+							<div>
+								<dt class="text-xs text-gray-500 font-medium">Status Pernikahan</dt>
+								<dd class="text-sm font-medium text-gray-900">
+									{% if lamaran.peserta.status_pernikahan %}
+										{{ lamaran.peserta.get_status_pernikahan_display }}
+									{% else %}
+										<span class="text-gray-500 italic">-</span>
+									{% endif %}
+								</dd>
+							</div>
+							<div>
+								<dt class="text-xs text-gray-500 font-medium">Golongan Darah</dt>
+								<dd class="text-sm font-medium text-gray-900">
+									{% if lamaran.peserta.golongan_darah %}
+										{{ lamaran.peserta.get_golongan_darah_display }}
+									{% else %}
+										<span class="text-gray-500 italic">-</span>
+									{% endif %}
+								</dd>
+							</div>
+						</dl>
+					</div>
+
+					<!-- Alamat -->
+					<div class="md:col-span-2">
+						<h4 class="text-sm font-semibold text-gray-700 mb-3">Alamat</h4>
+						<dl class="space-y-3">
+							<div>
+								<dt class="text-xs text-gray-500 font-medium">Alamat Domisili</dt>
+								<dd class="text-sm text-gray-700 whitespace-pre-line">
+									{% if lamaran.peserta.alamat_domisili %}
+										{{ lamaran.peserta.alamat_domisili }}
+									{% else %}
+										<span class="text-gray-500 italic">-</span>
+									{% endif %}
+								</dd>
+							</div>
+						</dl>
+					</div>
+
+					<!-- Fisik & Kesehatan -->
+					{% if lamaran.peserta.berat_badan or lamaran.peserta.tinggi_badan or lamaran.peserta.cek_mata_kanan or lamaran.peserta.cek_mata_kiri %}
+					<div class="md:col-span-2">
+						<h4 class="text-sm font-semibold text-gray-700 mb-3">Data Fisik & Kesehatan</h4>
+						<dl class="grid grid-cols-2 md:grid-cols-4 gap-4">
+							<div>
+								<dt class="text-xs text-gray-500 font-medium">Berat Badan</dt>
+								<dd class="text-sm font-medium text-gray-900">
+									{% if lamaran.peserta.berat_badan %}{{ lamaran.peserta.berat_badan }} kg{% else %}-{% endif %}
+								</dd>
+							</div>
+							<div>
+								<dt class="text-xs text-gray-500 font-medium">Tinggi Badan</dt>
+								<dd class="text-sm font-medium text-gray-900">
+									{% if lamaran.peserta.tinggi_badan %}{{ lamaran.peserta.tinggi_badan }} cm{% else %}-{% endif %}
+								</dd>
+							</div>
+							<div>
+								<dt class="text-xs text-gray-500 font-medium">Mata Kanan</dt>
+								<dd class="text-sm font-medium text-gray-900">
+									{% if lamaran.peserta.cek_mata_kanan %}{{ lamaran.peserta.cek_mata_kanan }}{% else %}-{% endif %}
+								</dd>
+							</div>
+							<div>
+								<dt class="text-xs text-gray-500 font-medium">Mata Kiri</dt>
+								<dd class="text-sm font-medium text-gray-900">
+									{% if lamaran.peserta.cek_mata_kiri %}{{ lamaran.peserta.cek_mata_kiri }}{% else %}-{% endif %}
+								</dd>
+							</div>
+						</dl>
+					</div>
 					{% endif %}
 				</div>
 			</div>
@@ -84,36 +217,71 @@
 
 			<!-- Catatan -->
 			<div class="mb-8">
-				<h3 class="text-lg font-semibold text-gray-900 mb-4">Catatan Lamaran</h3>
-				{% if lamaran.catatan %}
-					<div class="bg-gray-50 rounded-lg p-4">
-						<p class="text-gray-700 whitespace-pre-line">{{ lamaran.catatan }}</p>
+				<h3 class="text-lg font-semibold text-gray-900 mb-4">Catatan & Status Lamaran</h3>
+				<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+					<!-- Status Lamaran -->
+					<div class="bg-blue-50 rounded-lg p-6 border border-blue-200">
+						<h4 class="text-sm font-semibold text-gray-700 mb-3">Status Lamaran Saat Ini</h4>
+						<div class="flex items-center gap-3">
+							{% if lamaran.status_lamaran == 'Pending' %}
+								<span class="inline-flex items-center px-4 py-2 rounded-lg text-sm font-semibold bg-yellow-100 text-yellow-800">
+									🟡 {{ lamaran.status_lamaran }}
+								</span>
+							{% elif lamaran.status_lamaran == 'Direview' or lamaran.status_lamaran == 'Terdaftar' %}
+								<span class="inline-flex items-center px-4 py-2 rounded-lg text-sm font-semibold bg-blue-100 text-blue-800">
+									🔵 {{ lamaran.status_lamaran }}
+								</span>
+							{% elif lamaran.status_lamaran == 'Mendan 1' or lamaran.status_lamaran == 'Mendan 2' or lamaran.status_lamaran == 'Mensetsu' %}
+								<span class="inline-flex items-center px-4 py-2 rounded-lg text-sm font-semibold bg-purple-100 text-purple-800">
+									🟣 {{ lamaran.status_lamaran }}
+								</span>
+							{% elif lamaran.status_lamaran == 'GOUKAKU' %}
+								<span class="inline-flex items-center px-4 py-2 rounded-lg text-sm font-semibold bg-green-100 text-green-800">
+									✅ {{ lamaran.status_lamaran }}
+								</span>
+							{% elif lamaran.status_lamaran == 'FU GOKAKU' %}
+								<span class="inline-flex items-center px-4 py-2 rounded-lg text-sm font-semibold bg-red-100 text-red-800">
+									❌ {{ lamaran.status_lamaran }}
+								</span>
+							{% else %}
+								<span class="inline-flex items-center px-4 py-2 rounded-lg text-sm font-semibold bg-gray-100 text-gray-800">
+									{{ lamaran.status_lamaran }}
+								</span>
+							{% endif %}
+						</div>
+						<p class="text-xs text-gray-600 mt-4">
+							Diperbarui pada {{ lamaran.updated_at|date:"d M Y, H:i" }}
+						</p>
 					</div>
-				{% else %}
-					<p class="text-gray-500 italic">Tidak ada catatan</p>
-				{% endif %}
-			</div>
 
-			<!-- Timeline -->
-			<div class="mb-8">
-				<h3 class="text-lg font-semibold text-gray-900 mb-4">Timeline</h3>
-				<div class="space-y-3">
-					<div class="flex items-center">
-						<div class="w-2 h-2 bg-indigo-600 rounded-full mr-3"></div>
-						<div>
-							<p class="text-sm text-gray-500">Tanggal Lamar</p>
-							<p class="text-base font-medium text-gray-900">{{ lamaran.created_at|date:"d M Y" }}</p>
-						</div>
-					</div>
-					{% if lamaran.updated_at != lamaran.created_at %}
-						<div class="flex items-center">
-							<div class="w-2 h-2 bg-gray-400 rounded-full mr-3"></div>
+					<!-- Tanggal -->
+					<div class="bg-indigo-50 rounded-lg p-6 border border-indigo-200">
+						<h4 class="text-sm font-semibold text-gray-700 mb-4">Timeline</h4>
+						<dl class="space-y-3">
 							<div>
-								<p class="text-sm text-gray-500">Terakhir Diupdate</p>
-								<p class="text-base font-medium text-gray-900">{{ lamaran.updated_at|date:"d M Y" }}</p>
+								<dt class="text-xs text-gray-600">Tanggal Lamar</dt>
+								<dd class="text-sm font-semibold text-gray-900">{{ lamaran.created_at|date:"d M Y H:i" }}</dd>
 							</div>
-						</div>
-					{% endif %}
+							{% if lamaran.updated_at != lamaran.created_at %}
+							<div>
+								<dt class="text-xs text-gray-600">Terakhir Diupdate</dt>
+								<dd class="text-sm font-semibold text-gray-900">{{ lamaran.updated_at|date:"d M Y H:i" }}</dd>
+							</div>
+							{% endif %}
+						</dl>
+					</div>
+
+					<!-- Catatan -->
+					<div class="md:col-span-2 bg-amber-50 rounded-lg p-6 border border-amber-200">
+						<h4 class="text-sm font-semibold text-gray-700 mb-3">Catatan Lamaran</h4>
+						{% if lamaran.catatan %}
+							<div class="bg-white rounded-lg p-4 border border-amber-100">
+								<p class="text-sm text-gray-700 whitespace-pre-line leading-relaxed">{{ lamaran.catatan }}</p>
+							</div>
+						{% else %}
+							<p class="text-sm text-gray-500 italic">Tidak ada catatan untuk lamaran ini</p>
+						{% endif %}
+					</div>
 				</div>
 			</div>
 

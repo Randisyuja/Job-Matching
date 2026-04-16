@@ -1,108 +1,108 @@
 {% extends "staff/staff_base.html" %}
 {% block content %}
 
-<h3>Daftar Lamaran</h3>
+<section class="max-w-7xl mx-auto py-8">
+    <div class="flex flex-col gap-4 md:flex-row md:items-end md:justify-between mb-6">
+        <div>
+            <h1 class="text-2xl font-semibold text-gray-900">Daftar Lamaran</h1>
+            <p class="mt-1 text-sm text-gray-500">Kelola seluruh lamaran peserta dan status prosesnya.</p>
+        </div>
 
-<div class="d-flex justify-content-between mb-3">
+        <a href="{% url 'lamaran_create' %}" class="inline-flex items-center justify-center rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700 transition-colors">
+            + Buat Lamaran
+        </a>
+    </div>
 
-    <a href="{% url 'lamaran_create' %}" class="btn btn-primary">
-        + Buat Lamaran
-    </a>
+    <div class="mb-5 rounded-xl border border-gray-200 bg-white p-4">
+        <form method="get" class="flex flex-col gap-3 sm:flex-row sm:items-center">
+            <select name="status" class="w-full sm:w-64 rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-800 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                <option value="">Semua Status</option>
+                {% for value, label in status_choices %}
+                <option value="{{ value }}" {% if selected_status == value %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+            <div class="flex items-center gap-2">
+                <button type="submit" class="inline-flex items-center justify-center rounded-lg bg-gray-800 px-4 py-2.5 text-sm font-semibold text-white hover:bg-gray-900 transition-colors">
+                    Filter
+                </button>
+                {% if selected_status %}
+                    <a href="{% url 'lamaran_list' %}" class="inline-flex items-center justify-center rounded-lg border border-gray-300 px-4 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors">
+                        Reset
+                    </a>
+                {% endif %}
+            </div>
+        </form>
+    </div>
 
-    <form method="get" class="d-flex">
-        <select name="status" class="form-select me-2">
-            <option value="">Semua Status</option>
-            <option value="pending">Pending</option>
-            <option value="diproses">Diproses</option>
-            <option value="diterima">Diterima</option>
-            <option value="ditolak">Ditolak</option>
-        </select>
-        <button class="btn btn-secondary">Filter</button>
-    </form>
+    <div class="overflow-hidden rounded-xl border border-gray-200 bg-white">
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Peserta</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Lowongan</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Status</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Tanggal</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100 bg-white">
+                    {% for item in data %}
+                        <tr class="hover:bg-gray-50/80">
+                            <td class="px-4 py-3 text-sm font-medium text-gray-900">{{ item.peserta.nama_lengkap }}</td>
+                            <td class="px-4 py-3 text-sm text-gray-700">
+                                {{ item.lowongan.nama_perusahaan }} - {{ item.lowongan.jenis_pekerjaan.nama_pekerjaan }}
+                            </td>
+                            <td class="px-4 py-3 text-sm">
+                                <span class="inline-flex rounded-full bg-blue-100 px-2.5 py-1 text-xs font-semibold text-blue-700">
+                                    {{ item.status_lamaran }}
+                                </span>
+                            </td>
+                            <td class="px-4 py-3 text-sm text-gray-600">{{ item.created_at|date:"d M Y, H:i" }}</td>
+                            <td class="px-4 py-3">
+                                <div class="flex flex-wrap items-center gap-2">
+                                    <a href="{% url 'lamaran_detail' item.pk %}" class="inline-flex items-center rounded-lg border border-indigo-200 bg-indigo-50 px-3 py-1.5 text-xs font-semibold text-indigo-700 hover:bg-indigo-100 transition-colors">
+                                        Detail
+                                    </a>
+                                    <a href="{% url 'lamaran_status' item.pk %}" class="inline-flex items-center rounded-lg border border-amber-200 bg-amber-50 px-3 py-1.5 text-xs font-semibold text-amber-700 hover:bg-amber-100 transition-colors">
+                                        Update Status
+                                    </a>
+                                    <form method="post" action="{% url 'lamaran_delete' item.pk %}" class="inline">
+                                        {% csrf_token %}
+                                        <button type="submit" class="inline-flex items-center rounded-lg border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-700 hover:bg-red-100 transition-colors">
+                                            Hapus
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="5" class="px-4 py-8 text-center text-sm text-gray-500">Belum ada lamaran</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
 
-</div>
-
-<table class="table table-bordered table-striped">
-    <thead>
-        <tr>
-            <th>Peserta</th>
-            <th>Lowongan</th>
-            <th>Status</th>
-            <th>Tanggal</th>
-            <th>Aksi</th>
-        </tr>
-    </thead>
-
-    <tbody>
-        {% for item in data %}
-        <tr>
-            <td>{{ item.peserta.nama_lengkap }}</td>
-            <td>
-                {{ item.lowongan.nama_perusahaan }} -
-                {{ item.lowongan.jenis_pekerjaan.nama_pekerjaan }}
-            </td>
-            <td>
-                <span class="badge bg-info">
-                    {{ item.status_lamaran }}
-                </span>
-            </td>
-            <td>{{ item.created_at }}</td>
-            <td>
-                <a href="{% url 'lamaran_detail' item.pk %}" class="btn btn-sm btn-info">
-                    Detail
-                </a>
-
-                <a href="{% url 'lamaran_status' item.pk %}" class="btn btn-sm btn-warning">
-                    Update Status
-                </a>
-
-                <form method="post"
-                      action="{% url 'lamaran_delete' item.pk %}"
-                      style="display:inline;">
-                    {% csrf_token %}
-                    <button class="btn btn-sm btn-danger">
-                        Hapus
-                    </button>
-                </form>
-            </td>
-        </tr>
-        {% empty %}
-        <tr>
-            <td colspan="5" class="text-center">
-                Belum ada lamaran
-            </td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
-
-<!-- Pagination -->
-<nav>
-    <ul class="pagination">
+    <div class="mt-6 flex items-center justify-center gap-2">
         {% if data.has_previous %}
-        <li class="page-item">
-            <a class="page-link"
-               href="?page={{ data.previous_page_number }}">
+            <a href="?page={{ data.previous_page_number }}{% if selected_status %}&status={{ selected_status }}{% endif %}" class="rounded-lg border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors">
                 Previous
             </a>
-        </li>
         {% endif %}
 
-        <li class="page-item active">
-            <span class="page-link">
-                {{ data.number }}
-            </span>
-        </li>
+        <span class="rounded-lg border border-indigo-200 bg-indigo-50 px-4 py-2 text-sm font-semibold text-indigo-700">
+            {{ data.number }}
+        </span>
 
         {% if data.has_next %}
-        <li class="page-item">
-            <a class="page-link"
-               href="?page={{ data.next_page_number }}">
+            <a href="?page={{ data.next_page_number }}{% if selected_status %}&status={{ selected_status }}{% endif %}" class="rounded-lg border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors">
                 Next
             </a>
-        </li>
         {% endif %}
-    </ul>
-</nav>
+    </div>
+</section>
 
 {% endblock %}

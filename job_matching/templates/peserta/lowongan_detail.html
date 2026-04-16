@@ -1,7 +1,5 @@
 {% extends "peserta/peserta_base.html" %}
 
-{% block title %}{{ obj.nama_perusahaan }} - Detail Lowongan{% endblock %}
-
 {% block content %}
 <section class="max-w-5xl mx-auto px-6 py-8" x-data="{ showModal: false }">
 	<div class="mb-6">
@@ -22,13 +20,17 @@
 					<h1 class="text-3xl font-bold mb-2">{{ obj.nama_perusahaan }}</h1>
 					<p class="text-indigo-100 text-lg">{{ obj.jenis_pekerjaan.nama_pekerjaan }}</p>
 				</div>
-				{% if obj.is_active %}
+				{% if obj.status_label == 'Aktif' %}
 					<span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-400 text-white">
-						Aktif
+						{{ obj.status_label }}
+					</span>
+				{% elif obj.status_label == 'Sudah Terlaksana' %}
+					<span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-amber-400 text-white">
+						{{ obj.status_label }}
 					</span>
 				{% else %}
 					<span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-400 text-white">
-						Ditutup
+						{{ obj.status_label }}
 					</span>
 				{% endif %}
 			</div>
@@ -122,7 +124,7 @@
 					{% else %}
 						<button disabled
 								class="inline-flex items-center px-6 py-3 rounded-lg bg-gray-300 text-gray-500 text-base font-medium cursor-not-allowed">
-							Lowongan Ditutup
+							{{ obj.status_label }}
 						</button>
 					{% endif %}
 				{% endif %}
